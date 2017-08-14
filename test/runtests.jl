@@ -6,6 +6,8 @@ const FPS = FixedPolySystem
 
         p = FPS.Poly([3 1; 1 1; 0 2], [-2.0, 3.0])
 
+        @test string(p) == "-2.0x₁³x₂+3.0x₁x₂x₃²"
+
         @test p isa FPS.Poly{Float64}
         @test eltype(p) == Float64
         @test FPS.exponents(p) == [3 1; 1 1; 0 2]
@@ -42,6 +44,7 @@ end
         p = FPS.Poly([3 1; 1 1; 0 2], [-2.0, 3.0])
 
         F = PolySystem([p, p], [:x, :y, :z])
+        @test string(F) == "-2.0x³y+3.0xyz²\n-2.0x³y+3.0xyz²\n"
         @test F isa PolySystem{Float64}
 
         @test polynomials(F) == [p, p]
