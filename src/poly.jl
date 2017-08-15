@@ -1,11 +1,14 @@
 """
+    Poly(p::TypedPolynomials.Polynomial)
     Poly(exponents, coeffs, homogenized=false)
 
 A structure for fast multivariate Polynomial evaluation.
+Polynomials created from a TypedPolynomial a never assumed to be homogenized.
 
 ### Fields
 * `exponents::Matrix{Int}`: Each column represents the exponent of a term. The columns are sorted lexicographically by total degree.
 * `coeffs::Vector{T}`: List of the coefficients.
+* `homogenized::Bool`: Indicates whether a polynomial was homogenized
 
 ### Example
 ```
@@ -37,6 +40,29 @@ function Poly(exponents::Matrix{Int}, coeffs::Vector{T}; homogenized=false) wher
 end
 function Poly(exponents::Vector{Int}, coeffs::Vector{<:Number}; homogenized=false)
     Poly(reshape(exponents, (length(exponents), 1)), coeffs, homogenized)
+end
+
+function Poly(p::TP.Polynomial{T}) where T
+    exps, coeffs = coeffs_exponents(p)
+    Poly(exps, coeffs, false)
+end
+Poly(p::TP.PolynomialLike) = Poly(TP.polynomial(p))
+
+function coeffs_exponents(f::TypedPolynomials.Polynomial{T}) where T
+    terms = TP.terms(f)
+    nterms = length(terms)
+    nvars = TP.nvariables(f)
+    exps = Matrix{Int}(nvars, nterms)
+    coeffs = Vector{T}(nterms)
+    for j = 1:nterms
+        term = terms[j]
+        coeffs[j] = TP.coefficient(term)
+        texponents = TP.exponents(term)
+        for i = 1:nvars
+            exps[i,j] = texponents[i]
+        end
+    end
+    exps, coeffs
 end
 
 ==(p::Poly, q::Poly) = p.exponents == q.exponents && p.coeffs == q.coeffs
@@ -119,15 +145,15 @@ done(p::Poly, state) = state[1] > state[2]
 length(p::Poly) = nterms(p)
 
 """
-    evaluate(p::Poly{T}, x::AbstractVector{T})
+    evaluate(p::Poly, x::AbstractVector)
 
 Evaluates `p` at `x`, i.e. p(x)
 """
-function evaluate(p::Poly{T}, x::AbstractVector{T})::T where {T<:Number}
+function evaluate(p::Poly{S}, x::AbstractVector{T}) where {S<:Number, T<:Number}
     cfs = coeffs(p)
     exps = exponents(p)
     nvars, nterms = size(exps)
-    res = zero(T)
+    res = zero(promote_type(S,T))
     for j = 1:nterms
         term = cfs[j]
         for i = 1:nvars
@@ -138,7 +164,7 @@ function evaluate(p::Poly{T}, x::AbstractVector{T})::T where {T<:Number}
     end
     res
 end
-(p::Poly{T})(x::Vector{T}) where {T<:Number} = evaluate(p, x)
+(p::Poly)(x) = evaluate(p, x)
 
 
 """
@@ -166,11 +192,11 @@ end
 
 
 """
-    gradient(p::Poly)
+    differentiate(p::Poly)
 
 Differentiates Poly `p`. Returns the gradient vector.
 """
-gradient(p::Poly) = map(i -> differentiate(p, i), 1:nvariables(p))
+differentiate(poly::Poly) = map(i -> differentiate(poly, i), 1:nvariables(poly))
 
 
 """
