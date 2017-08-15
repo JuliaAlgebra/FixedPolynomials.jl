@@ -27,7 +27,7 @@ matrix:
 
 ## uncomment the following lines to override the default test script
 script:
-  - julia -e 'Pkg.clone("https://github.com/blegat/MultivariatePolynomials.jl.git");Pkg.clone("https://github.com/blegat/DymamicPolynomials.jl.git");Pkg.clone("https://github.com/rdeits/TypedPolynomials.jl.git");Pkg.checkout("TypedPolynomials", "typed");Pkg.clone(pwd()); Pkg.build("FixedPolySystem"); Pkg.test("FixedPolySystem"; coverage=true)'
+  - julia -e 'Pkg.clone("https://github.com/blegat/MultivariatePolynomials.jl.git");Pkg.clone("https://github.com/blegat/DynamicPolynomials.jl.git");Pkg.clone("https://github.com/rdeits/TypedPolynomials.jl.git");Pkg.checkout("TypedPolynomials", "typed");Pkg.clone(pwd()); Pkg.build("FixedPolySystem"); Pkg.test("FixedPolySystem"; coverage=true)'
 after_success:
   # push coverage results to Coveralls
   - julia -e 'cd(Pkg.dir("FixedPolySystem")); Pkg.add("Coverage"); using Coverage; Coveralls.submit(Coveralls.process_folder())'
