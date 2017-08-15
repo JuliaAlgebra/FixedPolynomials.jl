@@ -1,5 +1,5 @@
 """
-    Poly(p::TypedPolynomials.Polynomial)
+    Poly(p::AbstractPolynomial)
     Poly(exponents, coeffs, homogenized=false)
 
 A structure for fast multivariate Polynomial evaluation.
@@ -42,24 +42,30 @@ function Poly(exponents::Vector{Int}, coeffs::Vector{<:Number}; homogenized=fals
     Poly(reshape(exponents, (length(exponents), 1)), coeffs, homogenized)
 end
 
-function Poly(p::TP.Polynomial{T}) where T
-    exps, coeffs = coeffs_exponents(p)
+
+function Poly(p::MP.AbstractPolynomial{T}, vars) where T
+    exps, coeffs = coeffs_exponents(p, vars)
     Poly(exps, coeffs, false)
 end
-Poly(p::TP.PolynomialLike) = Poly(TP.polynomial(p))
 
-function coeffs_exponents(f::TypedPolynomials.Polynomial{T}) where T
-    terms = TP.terms(f)
+function Poly(p::MP.AbstractPolynomial{T}) where T
+    exps, coeffs = coeffs_exponents(p, MP.variables(p))
+    Poly(exps, coeffs, false)
+end
+Poly(p::MP.AbstractPolynomialLike, vars) = Poly(MP.polynomial(p), vars)
+Poly(p::MP.AbstractPolynomialLike) = Poly(MP.polynomial(p))
+
+function coeffs_exponents(poly::MP.AbstractPolynomial{T}, vars) where {T}
+    terms = MP.terms(poly)
     nterms = length(terms)
-    nvars = TP.nvariables(f)
+    nvars = length(vars)
     exps = Matrix{Int}(nvars, nterms)
     coeffs = Vector{T}(nterms)
     for j = 1:nterms
         term = terms[j]
-        coeffs[j] = TP.coefficient(term)
-        texponents = TP.exponents(term)
+        coeffs[j] = MP.coefficient(term)
         for i = 1:nvars
-            exps[i,j] = texponents[i]
+            exps[i,j] = MP.exponent(term, vars[i])
         end
     end
     exps, coeffs

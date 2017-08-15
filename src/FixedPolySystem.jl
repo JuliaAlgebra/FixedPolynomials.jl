@@ -1,6 +1,6 @@
 module FixedPolySystem
-    import TypedPolynomials
-    const TP = TypedPolynomials
+    import MultivariatePolynomials
+    const MP = MultivariatePolynomials
     import Base: start, next, done, length, eltype, show, ==, convert, promote_rule
 
     include("poly.jl")

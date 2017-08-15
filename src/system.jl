@@ -40,12 +40,12 @@ function PolySystem(polys::Vector{Poly{T}}) where {T<:Number}
     PolySystem(polys, vars)
 end
 
-function PolySystem(polys::Vector{P}) where {P<:TP.PolynomialLike}
+function PolySystem(polys::Vector{P}) where {P<:MP.AbstractPolynomialLike}
 	if length(polys) == 0
 		error("Cannot construct an empty PolySystem")
 	end
-	vars = collect(Symbol.(TP.variables(polys[1])))
-	PolySystem(Poly.(polys), vars)
+	vars = union(Iterators.flatten(MP.variables.(polys)))
+	PolySystem(map(p -> Poly(p, vars), polys), Symbol.(vars))
 end
 
 function ==(P::PolySystem, Q::PolySystem)
