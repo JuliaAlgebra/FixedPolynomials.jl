@@ -75,7 +75,7 @@ end
         f = FPS.Poly([2 1 0;0 1 2], [3.0, 2.0, -1.0])
         g = FPS.Poly([2 1 0;0 1 2], [-2.5+2im,-3.0, 4.0])
         F = PolySystem([f, f])
-        @test length(p) == 2
+        @test length(F) == 2
         @test eltype(F) == typeof(f)
         for p in F
                 @test p == f
