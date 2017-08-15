@@ -27,6 +27,9 @@ function PolySystem(polys::Vector{Poly{T}}, vars::Vector{Symbol}) where {T<:Numb
 end
 
 function PolySystem(polys::Vector{Poly{T}}) where {T<:Number}
+	if length(polys) == 0
+		error("Cannot construct an empty PolySystem")
+	end
     nvars = nvariables(polys[1])
     first_homogenized = homogenized(polys[1])
     if first_homogenized
@@ -35,6 +38,14 @@ function PolySystem(polys::Vector{Poly{T}}) where {T<:Number}
         vars = [Symbol("x$i") for i=1:nvars]
     end
     PolySystem(polys, vars)
+end
+
+function PolySystem(polys::Vector{P}) where {P<:TP.PolynomialLike}
+	if length(polys) == 0
+		error("Cannot construct an empty PolySystem")
+	end
+	vars = collect(Symbol.(TP.variables(polys[1])))
+	PolySystem(Poly.(polys), vars)
 end
 
 function ==(P::PolySystem, Q::PolySystem)
@@ -84,6 +95,22 @@ evaluate(P::PolySystem, x) = map(p -> evaluate(p, x), P.polys)
 Evaluate the polynomial system `P` at `x` and store the result in `u`.
 """
 evaluate!(u, P::PolySystem, x) = map!(p -> evaluate(p, x), u, P.polys)
+
+
+"""
+    differentiate(P::PolySystem)
+
+Differentiates the polynomial system `P` and returns an evaluation function `x -> J_P(x)`
+where `J_P` is the jacobian of `P`.
+"""
+function differentiate(P::PolySystem{T}) where {T<:Number}
+	m = length(P)
+	n = nvariables(P)
+	polys = polynomials(P)
+	jacobian = [differentiate(polys[i], j) for i=1:m,j=1:n]
+
+	x -> map(p -> p(x), jacobian)
+end
 
 """
     ishomogenous(P::PolySystem)
