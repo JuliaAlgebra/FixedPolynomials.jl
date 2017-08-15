@@ -42,6 +42,14 @@ function ==(P::PolySystem, Q::PolySystem)
     P.polys == Q.polys
 end
 
+# ITERATOR
+start(p::PolySystem) = start(p.polys)
+next(p::PolySystem, state) = next(p.polys, state)
+done(p::PolySystem, state) = done(p.polys, state)
+length(p::PolySystem) = length(p.polys)
+eltype(p::PolySystem) = eltype(p.polys)
+
+
 """
     variables(P::PolySystem)
 

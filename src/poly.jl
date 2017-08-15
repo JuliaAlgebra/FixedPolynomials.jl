@@ -36,7 +36,7 @@ function Poly(exponents::Matrix{Int}, coeffs::Vector{T}; homogenized=false) wher
     Poly{T}(exponents, coeffs, homogenized)
 end
 function Poly(exponents::Vector{Int}, coeffs::Vector{<:Number}; homogenized=false)
-    Poly(reshape(exponents, (length(exponents), 1), coeffs), homogenized)
+    Poly(reshape(exponents, (length(exponents), 1)), coeffs, homogenized)
 end
 
 ==(p::Poly, q::Poly) = p.exponents == q.exponents && p.coeffs == q.coeffs
@@ -117,19 +117,6 @@ function next(p::Poly, state::Tuple{Int,Int})
 end
 done(p::Poly, state) = state[1] > state[2]
 length(p::Poly) = nterms(p)
-
-# function getindex(f::Poly, I)
-#     A = f.exponents
-#     res = 1:size(A,2)
-#     for i in eachindex(x)
-#         res = res[find(y -> y == x[i], A[i,res])]
-#         if isempty(res)
-#             return zero(eltype(f))
-#         end
-#     end
-
-#     f.coeffs[res[1]]
-# end
 
 """
     evaluate(p::Poly{T}, x::AbstractVector{T})

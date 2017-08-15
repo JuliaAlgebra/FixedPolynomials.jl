@@ -5,9 +5,7 @@ const FPS = FixedPolySystem
 @testset "poly" begin
 
         p = FPS.Poly([3 1; 1 1; 0 2], [-2.0, 3.0])
-
         @test string(p) == "-2.0x₁³x₂+3.0x₁x₂x₃²"
-
         @test p isa FPS.Poly{Float64}
         @test eltype(p) == Float64
         @test FPS.exponents(p) == [3 1; 1 1; 0 2]
@@ -15,7 +13,11 @@ const FPS = FixedPolySystem
         @test FPS.nvariables(p) == 3
         @test FPS.deg(p) == 4
 
-        q = FPS.Poly(reshape([3; 1; 0],(3,1)), [-2.0])
+        @test string(FPS.Poly([3 1; 1 1; 0 2], [-2.0, 3.0+2im])) == "-2.0x₁³x₂+(3.0 + 2.0im)x₁x₂x₃²"
+        @test string(FPS.Poly([3 1; 1 1; 0 2], [-2.0, 3.0+0im])) == "-2.0x₁³x₂+3.0x₁x₂x₃²"
+        @test string(FPS.Poly(collect(1:9),[-1.0])) == "-x₁x₂²x₃³x₄⁴x₅⁵x₆⁶x₇⁷x₈⁸x₉⁹"
+
+        q = FPS.Poly([3; 1; 0], [-2.0])
         @test q([1, 2.0, 3.0]) == -4
         q = FPS.Poly(reshape([1; 1; 2],(3,1)), [3.0])
         @test q([1, 2.0, 3.0]) == 54
@@ -28,7 +30,7 @@ const FPS = FixedPolySystem
 
         @test FPS.ishomogenous(p) == true
 
-        @test FPS.homogenize(FPS.Poly([1 1; 0 2], [-2.0, 3.0])) == FPS.Poly([2 0; 1 1; 0 2], [-2.0, 3.0])
+        @test string(FPS.homogenize(FPS.Poly([1 1; 0 2], [-2.0, 3.0]))) == "-2.0x₀²x₁+3.0x₁x₂²"
 
         @test FPS.dehomogenize(p) == FPS.Poly([1 1; 0 2], [-2.0, 3.0])
 
@@ -73,6 +75,11 @@ end
         f = FPS.Poly([2 1 0;0 1 2], [3.0, 2.0, -1.0])
         g = FPS.Poly([2 1 0;0 1 2], [-2.5+2im,-3.0, 4.0])
         F = PolySystem([f, f])
+        @test length(p) == 2
+        @test eltype(F) == typeof(f)
+        for p in F
+                @test p == f
+        end
         G = PolySystem([g, g])
         @test weyldot(F,G) == 2 * weyldot(f,g)
         @test weylnorm(F)^2 ≈ weyldot(F,F)

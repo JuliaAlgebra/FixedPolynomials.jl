@@ -16,11 +16,9 @@ function show(io::IO, P::PolySystem)
     end
 end
 
-
-
 #helpers
 
-function print_poly(io::IO, p::Poly, vars)
+function print_poly(io::IO, p::Poly{T}, vars) where T
     first = true
     exps = exponents(p)
     cfs = coeffs(p)
@@ -123,21 +121,11 @@ pretty_var(var) = pretty_var(string(var))
 show_plus(x::Real) = x >= 0
 show_plus(x::Complex) = x != -1
 
-show_coeff{T<:Real}(io::IO, x::T) = print(io, x)
-function show_coeff{T<:Complex}(io::IO, x::T)
+show_coeff(io::IO, x::Real) = print(io, x)
+function show_coeff(io::IO, x::Complex)
     if imag(x) ≈ 0
         print(io, convert(Float64, x))
     else
         print(io, "($(x))")
     end
 end
-
-function total_deg_isless{N,T<:Number}(a::NTuple{N,T},b::NTuple{N,T})
-    if sum(a) < sum(b)
-        true
-    else
-        a < b
-    end
-end
-sort_bytotal{T<:Number, N}(xs::Vector{NTuple{N,T}}) = sort(xs, lt=total_deg_isless, rev=true)
-sort_bytotal!{T<:Number, N}(xs::Vector{NTuple{N,T}}) = sort!(xs, lt=total_deg_isless, rev=true)
