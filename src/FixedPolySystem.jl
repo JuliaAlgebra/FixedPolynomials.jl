@@ -9,7 +9,7 @@ module FixedPolySystem
     include("convert_promote.jl")
 
     export Poly, PolySystem,
-        nvariables, variables, polynomials,
+        nvariables, variables, polynomials, degrees,
         evaluate, evaluate!, differentiate,
         ishomogenous, homogenize, homogenized, dehomogenize,
         weyldot, weylnorm

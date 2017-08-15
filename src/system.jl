@@ -83,6 +83,14 @@ The polynomials of the system `P`.
 polynomials(P::PolySystem) = P.polys
 
 """
+    degrees(P::PolySystem)
+
+The (total) degrees of the polynomials of the system `P`.
+"""
+degrees(P::PolySystem) = deg.(P.polys)
+
+
+"""
     evaluate(P::PolySystem, x)
 
 Evaluate the polynomial system `P` at `x`.
@@ -101,7 +109,7 @@ evaluate!(u, P::PolySystem, x) = map!(p -> evaluate(p, x), u, P.polys)
     differentiate(P::PolySystem)
 
 Differentiates the polynomial system `P` and returns an evaluation function `x -> J_P(x)`
-where `J_P` is the jacobian of `P`.
+where `J_P` is the differentiate of `P`.
 """
 function differentiate(P::PolySystem{T}) where {T<:Number}
 	m = length(P)
