@@ -203,7 +203,6 @@ function substitute(p::Poly{S}, varindex, x::T) where {S<:Number, T<:Number}
         found_duplicate = false
         for k = 1:length(new_exps)
             if new_exps[k] == exp
-                @show cfs
                 new_coeffs[k] += coeff
                 found_duplicate = true
                 break
