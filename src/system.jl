@@ -97,12 +97,28 @@ Evaluate the polynomial system `P` at `x`.
 """
 evaluate(P::PolySystem, x) = map(p -> evaluate(p, x), P.polys)
 (P::PolySystem)(x) = evaluate(P, x)
+
 """
     evaluate!(u, P::PolySystem, x)
 
 Evaluate the polynomial system `P` at `x` and store the result in `u`.
 """
 evaluate!(u, P::PolySystem, x) = map!(p -> evaluate(p, x), u, P.polys)
+
+"""
+    substitute(P::PolySystem, var=>x)
+
+Substitute a variable with a constant value.
+"""
+function substitute(P::PolySystem, pair::Pair{Symbol,<:Number})
+    indexofvar = findfirst(variables(P), first(pair))
+    if indexofvar == 0
+        return P
+    end
+    polys = map(p -> substitute(p, indexofvar, last(pair)), P.polys)
+
+    PolySystem(polys, [P.vars[1:indexofvar-1]; P.vars[indexofvar+1:end]])
+ end
 
 
 """

@@ -17,6 +17,12 @@
     Impl.@polyvar x[1:3]
     f = -2.0x[1]^3*x[2]+3.0x[1]*x[2]*x[3]^2
     @test "$(FPS.Poly(f))" == "-2.0x₁³x₂+3.0x₁x₂x₃²"
+
+    @test string(substitute(FPS.Poly(f), 2, 2.0)) == "-4.0x₁³+6.0x₁x₂²"
+    @test string(substitute(FPS.Poly(f), 1, 2.0)) == "6.0x₁x₂²-16.0x₁"
+    @test string(substitute(FPS.Poly(-2.0x[1]^3*x[2]+5.0x[1]^3*x[2]^2), 2, 1.0)) == "3.0x₁³"
+
+
     @test "$(FPS.Poly(x[1]))" == "x₁"
     @test "$(FPS.Poly(x[1]^2))" == "x₁²"
     @test "$(FPS.Poly(2x[1]))" == "2x₁"
