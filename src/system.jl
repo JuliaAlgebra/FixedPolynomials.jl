@@ -3,7 +3,7 @@
 
 Construct a system of polynomials.
 """
-struct PolySystem{T<:Number}
+struct PolySystem{T<:Number} <: AbstractPolySystem{T}
     polys::Vector{Poly{T}}
     vars::Vector{Symbol}
 
