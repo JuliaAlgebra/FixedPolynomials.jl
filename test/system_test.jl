@@ -8,6 +8,7 @@
         @test string(F) == "-2.0x³y+3.0xyz²\n-2.0x³y+3.0xyz²\n"
 
         @test string(substitute(F, :z=>2.0)) == "-2.0x³y+12.0xy\n-2.0x³y+12.0xy\n"
+        @test substitute(F, :w=>2.0) == F
         @test nvariables(substitute(F, :z=>2.0)) == 2
 
         @test polynomials(F) == [p, p]

@@ -112,6 +112,9 @@ Substitute a variable with a constant value.
 """
 function substitute(P::PolySystem, pair::Pair{Symbol,<:Number})
     indexofvar = findfirst(variables(P), first(pair))
+    if indexofvar == 0
+        return P
+    end
     polys = map(p -> substitute(p, indexofvar, last(pair)), P.polys)
 
     PolySystem(polys, [P.vars[1:indexofvar-1]; P.vars[indexofvar+1:end]])
