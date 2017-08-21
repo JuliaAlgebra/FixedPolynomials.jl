@@ -109,6 +109,10 @@ evaluate!(u, P::PolySystem, x) = map!(p -> evaluate(p, x), u, P.polys)
     substitute(P::PolySystem, var=>x)
 
 Substitute a variable with a constant value.
+
+## Example
+
+    substitute([x^2-y, y^2-x], :x=>2.0) == [-y+4.0, y^2-2.0]
 """
 function substitute(P::PolySystem, pair::Pair{Symbol,<:Number})
     indexofvar = findfirst(variables(P), first(pair))
@@ -120,6 +124,13 @@ function substitute(P::PolySystem, pair::Pair{Symbol,<:Number})
     PolySystem(polys, [P.vars[1:indexofvar-1]; P.vars[indexofvar+1:end]])
  end
 
+ """
+     removepoly(P::PolySystem, i)
+
+ Remove the `i`-th polynomial from the system. This assume all variables still ocurr in the
+ new system.
+ """
+removepoly(P::PolySystem, i::Int) = PolySystem([P.polys[1:i-1]; P.polys[i+1:end]], P.vars)
 
 """
     differentiate(P::PolySystem)

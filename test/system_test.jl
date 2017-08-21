@@ -58,4 +58,7 @@
         F = PolySystem([x^2, 3y^3])
         DF = differentiate(F)
         @test DF([2.0, 2.0]) == [4.0 0.0; 0.0 36.0]
+
+        @test length(FPS.removepoly(F, 1)) == 1
+        @test nvariables(FPS.removepoly(F, 1)) == 2
 end
