@@ -7,6 +7,9 @@
         @test F isa PolySystem{Float64}
         @test string(F) == "-2.0x³y+3.0xyz²\n-2.0x³y+3.0xyz²\n"
 
+        @test string(substitute(F, :z=>2.0)) == "-2.0x³y+12.0xy\n-2.0x³y+12.0xy\n"
+        @test nvariables(substitute(F, :z=>2.0)) == 2
+
         @test polynomials(F) == [p, p]
         @test variables(F) == [:x, :y, :z]
         @test nvariables(F) == 3

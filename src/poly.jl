@@ -174,6 +174,52 @@ end
 
 
 """
+    substitute(p::Poly, i, x)
+
+Substitute in `p` for the variable with index `i` `x`.
+"""
+function substitute(p::Poly{S}, varindex, x::T) where {S<:Number, T<:Number}
+    cfs = coeffs(p)
+    exps = exponents(p)
+    nvars, nterms = size(exps)
+
+    new_coeffs = Vector{promote_type(S,T)}()
+    new_exps = Vector{Vector{Int}}()
+
+    for j = 1:nterms
+        coeff = cfs[j]
+        exp = Vector{Int}(nvars - 1)
+        # first we calculate the new coefficient and remove the varindex-th row
+        for i = 1:nvars
+            if i == varindex
+                coeff *= x^(exps[i, j])
+            elseif i > varindex
+                exp[i-1] = exps[i, j]
+            else
+                exp[i] = exps[i, j]
+            end
+        end
+        # now we have to delete possible duplicates
+        found_duplicate = false
+        for k = 1:length(new_exps)
+            if new_exps[k] == exp
+                @show cfs
+                new_coeffs[k] += coeff
+                found_duplicate = true
+                break
+            end
+        end
+        if !found_duplicate
+            push!(new_coeffs, coeff)
+            push!(new_exps, exp)
+        end
+    end
+
+    # now we have to create a new matrix and return the poly
+    Poly(hcat(new_exps...), new_coeffs, p.homogenized)
+end
+
+"""
     differentiate(p::Poly, varindex)
 
 Differentiates p w.r.t to the `varindex`th variable.

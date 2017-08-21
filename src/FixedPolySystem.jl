@@ -13,7 +13,7 @@ module FixedPolySystem
 
     export Poly, PolySystem,
         nvariables, variables, polynomials, degrees,
-        evaluate, evaluate!, differentiate,
+        evaluate, evaluate!, substitute, differentiate,
         ishomogenous, homogenize, homogenized, dehomogenize,
         weyldot, weylnorm
 
