@@ -65,7 +65,7 @@ function coeffs_exponents(poly::MP.AbstractPolynomial{T}, vars) where {T}
         term = terms[j]
         coeffs[j] = MP.coefficient(term)
         for i = 1:nvars
-            exps[i,j] = MP.exponent(term, vars[i])
+            exps[i,j] = MP.degree(term, vars[i])
         end
     end
     exps, coeffs
