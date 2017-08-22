@@ -48,6 +48,8 @@ function PolySystem(polys::Vector{P}) where {P<:MP.AbstractPolynomialLike}
 	PolySystem(map(p -> Poly(p, vars), polys), Symbol.(vars))
 end
 
+coefftype(::PolySystem{T}) where T = T
+
 function ==(P::PolySystem, Q::PolySystem)
     P.vars == Q.vars &&
     P.polys == Q.polys

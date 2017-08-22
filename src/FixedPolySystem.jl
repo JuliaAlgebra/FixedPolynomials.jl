@@ -15,6 +15,6 @@ module FixedPolySystem
         nvariables, variables, polynomials, degrees,
         evaluate, evaluate!, substitute, removepoly, differentiate,
         ishomogenous, homogenize, homogenized, dehomogenize,
-        weyldot, weylnorm
+        weyldot, weylnorm, coefftype
 
 end

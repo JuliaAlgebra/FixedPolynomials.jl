@@ -55,6 +55,8 @@ end
 Poly(p::MP.AbstractPolynomialLike, vars) = Poly(MP.polynomial(p), vars)
 Poly(p::MP.AbstractPolynomialLike) = Poly(MP.polynomial(p))
 
+coefftype(::Poly{T}) where T = T
+
 function coeffs_exponents(poly::MP.AbstractPolynomial{T}, vars) where {T}
     terms = MP.terms(poly)
     nterms = length(terms)
