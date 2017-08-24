@@ -259,7 +259,7 @@ function differentiate(p::Poly{T}, i_var) where T
         end
 
         new_exps[:, j - skipped_cols] = exps[:, j]
-        new_coeffs[:, j - skipped_cols] = cfs[j]
+        new_coeffs[j - skipped_cols] = cfs[j]
     end
 
     Poly(new_exps, new_coeffs, p.homogenized)
