@@ -273,6 +273,12 @@ Differentiates Poly `p`. Returns the gradient vector.
 """
 differentiate(poly::Poly) = map(i -> differentiate(poly, i), 1:nvariables(poly))
 
+"""
+    ∇(p::Poly)
+
+Returns the gradient vector of `p`.
+"""
+@inline ∇(poly::Poly) = differentiate(poly)
 
 """
     ishomogenous(p::Poly)
