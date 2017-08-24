@@ -225,22 +225,44 @@ end
 
 Differentiates p w.r.t to the `varindex`th variable.
 """
-function differentiate(p::Poly, i_var)
+function differentiate(p::Poly{T}, i_var) where T
     exps = copy(exponents(p))
+    cfs = copy(coeffs(p))
     n_vars, n_terms = size(exps)
 
-    cfs = copy(coeffs(p))
+    zerocolumns = Int[]
     for j=1:n_terms
         k = exps[i_var, j]
         if k > 0
             exps[i_var, j] = max(0, k - 1)
             cfs[j] *= k
         else
-            exps[:,j] = zeros(Int, n_vars, 1)
-            cfs[j] = zero(eltype(p))
+            push!(zerocolumns , j)
         end
     end
-    Poly(exps, cfs, p.homogenized)
+
+    # now we have to get rid of all zeros
+    nzeros = length(zerocolumns)
+    if nzeros == 0
+        return Poly(exps, cfs, p.homogenized)
+    end
+
+    skipped_cols = 0
+    new_exps = zeros(Int, n_vars, n_terms - nzeros)
+    new_coeffs = zeros(T, n_terms - nzeros)
+
+    for j = 1:n_terms
+        # if we not yet have skipped all zero columns
+        if skipped_cols < nzeros && j == zerocolumns[skipped_cols+1]
+            skipped_cols += 1
+            continue
+        end
+
+        new_exps[:, j - skipped_cols] = exps[:, j]
+        new_coeffs[:, j - skipped_cols] = cfs[j]
+    end
+
+    Poly(new_exps, new_coeffs, p.homogenized)
 end
 
 
