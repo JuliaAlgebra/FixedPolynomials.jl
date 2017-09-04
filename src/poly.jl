@@ -1,94 +1,83 @@
-"""
-    Poly(p::AbstractPolynomial)
-    Poly(exponents, coeffs, homogenized=false)
+export Polynomial, exponents, coefficients, variables, nvariables, nterms,
+    ishomogenized, ishomogenous, homogenize, dehomogenize, degree, evaluate,
+    differentiate, ∇, weylnorm, weyldot
 
-A structure for fast multivariate Polynomial evaluation.
-Polynomials created from a TypedPolynomial a never assumed to be homogenized.
+"""
+    Polynomial(p::MultivariatePolynomials.AbstractPolynomial [, variables [, homogenized=false]])
+
+A structure for fast evaluation of multivariate polynomials.
 
 ### Fields
-* `exponents::Matrix{Int}`: Each column represents the exponent of a term. The columns are sorted lexicographically by total degree.
-* `coeffs::Vector{T}`: List of the coefficients.
-* `homogenized::Bool`: Indicates whether a polynomial was homogenized
+* `exponents::Matrix{Int}`: Each column represents the exponent of a term. The columns are sorted first by total degree, then lexicographically.
+* `coefficients::Vector{T}`: List of the coefficients.
+* `variables::Vector{Symbol}`: List of the variables of the polynomial.
+* `homogenized::Bool`: `Polynomial` has first class support
+for [homogenous polynomials](https://en.wikipedia.org/wiki/Homogeneous_polynomial).
+This field indicats whether the first variable should be considered as the homogenization variable.
+
+
+    Polynomial{T}(p::MultivariatePolynomials.AbstractPolynomial [, variables [, homogenized=false]])
+
+
+You can force a coefficient type `T`. For optimal performance `T` should be same type as
+the input to with which it will be evaluated.
+
+
+    Polynomial(exponents::Matrix{Int}, coefficients::Vector{T}, variables, [, homogenized=false])
+
+You can also create a polynomial directly. Note that in exponents each column represents the exponent of a term.
 
 ### Example
 ```
-Poly: 3XYZ^2 - 2X^3Y
-exponents:
-    [ 3 1
-      1 1
-      0 2 ]
-coeffs: [-2.0, 3.0]
+Poly([3 1; 1 1: 0 2 ], [-2.0, 3.0], [:x, :y, :z]) == 3.0x^2yz^2 - 2x^3y
 ```
 """
-struct Poly{T<:Number}
+struct Polynomial{T<:Number}
     exponents::Matrix{Int}
-    coeffs::Vector{T}
+    coefficients::Vector{T}
+    variables::Vector{Symbol}
     homogenized::Bool
 
-    function Poly{T}(exponents::Matrix{Int}, coeffs::Vector{T}, homogenized::Bool) where {T<:Number}
+    function Polynomial{T}(exponents::Matrix{Int}, coefficients::Vector{T}, variables::Vector{Symbol}, homogenized::Bool) where {T<:Number}
         sorted_cols = sort!([1:size(exponents,2);], lt=((i, j) -> lt_total_degree(exponents[:,i], exponents[:,j])), rev=true)
-
-        new(exponents[:, sorted_cols], coeffs[sorted_cols], homogenized)
+        new(exponents[:, sorted_cols], coefficients[sorted_cols], variables, homogenized)
     end
 end
-function Poly{T}(exponents::Matrix{Int}, coeffs::Vector{S}, homogenized::Bool) where {T<:Number, S<:Number}
-    Poly{T}(exponents, convert(Vector{T}, coeffs), homogenized)
-end
-function Poly(exponents::Matrix{Int}, coeffs::Vector{T}, homogenized::Bool) where {T<:Number}
-    Poly{T}(exponents, coeffs, homogenized)
+
+function Polynomial(exponents::Matrix{Int}, coefficients::Vector{T}, variables::Vector{Symbol}, homogenized::Bool=false) where {T<:Number}
+    Polynomial{T}(exponents, coefficients, variables, homogenized)
 end
 
-function Poly(exponents::Matrix{Int}, coeffs::Vector{T}; homogenized=false) where {T<:Number}
-    Poly{T}(exponents, coeffs, homogenized)
+function Polynomial(exponents::Matrix{Int}, coefficients::Vector{T}, homogenized::Bool=false) where {T<:Number}
+    Polynomial{T}(exponents, coefficients, [Symbol("x$(i)") for i=1:size(exponents, 1)], homogenized)
 end
-function Poly(exponents::Vector{Int}, coeffs::Vector{<:Number}; homogenized=false)
-    Poly(reshape(exponents, (length(exponents), 1)), coeffs, homogenized)
+function Polynomial(p::MP.AbstractPolynomialLike, variables::Vector{<:MP.AbstractVariable}, homogenized::Bool=false)
+    exps, coefficients = _coefficients_exponents(p, variables)
+    Polynomial(exps, coefficients, Symbol.(variables), homogenized)
 end
+Polynomial(p::MP.AbstractPolynomialLike, homogenized::Bool=false) = Polynomial(p, MP.variables(p), homogenized)
 
-
-function Poly(p::MP.AbstractPolynomial{T}, vars) where T
-    exps, coeffs = coeffs_exponents(p, vars)
-    Poly(exps, coeffs, false)
+function Polynomial{T}(p::MP.AbstractPolynomialLike, variables::Vector{<:MP.AbstractVariable}, homogenized::Bool=false) where {T<:Number}
+    exps, coefficients = _coefficients_exponents(p, variables)
+    Polynomial{T}(exps, convert(Vector{T}, coefficients), Symbol.(variables), homogenized)
 end
+Polynomial{T}(p::MP.AbstractPolynomialLike, homogenized::Bool=false) where {T<:Number} = Polynomial{T}(p, MP.variables(p), homogenized)
 
-function Poly(p::MP.AbstractPolynomial{T}) where T
-    exps, coeffs = coeffs_exponents(p, MP.variables(p))
-    Poly(exps, coeffs, false)
-end
-Poly(p::MP.AbstractPolynomialLike, vars) = Poly(MP.polynomial(p), vars)
-Poly(p::MP.AbstractPolynomialLike) = Poly(MP.polynomial(p))
-
-function Poly{T}(p::MP.AbstractPolynomial, vars) where {T}
-    exps, coeffs = coeffs_exponents(p, vars)
-    Poly{T}(exps, coeffs, false)
-end
-
-function Poly{T}(p::MP.AbstractPolynomial) where T
-    exps, coeffs = coeffs_exponents(p, MP.variables(p))
-    Poly{T}(exps, coeffs, false)
-end
-Poly{T}(p::MP.AbstractPolynomialLike, vars) where T = Poly{T}(MP.polynomial(p), vars)
-Poly{T}(p::MP.AbstractPolynomialLike) where T= Poly{T}(MP.polynomial(p))
-
-coefftype(::Poly{T}) where T = T
-
-function coeffs_exponents(poly::MP.AbstractPolynomial{T}, vars) where {T}
+function _coefficients_exponents(poly::MP.AbstractPolynomialLike{T}, vars) where {T}
     terms = MP.terms(poly)
     nterms = length(terms)
     nvars = length(vars)
     exps = Matrix{Int}(nvars, nterms)
-    coeffs = Vector{T}(nterms)
+    coefficients = Vector{T}(nterms)
     for j = 1:nterms
         term = terms[j]
-        coeffs[j] = MP.coefficient(term)
+        coefficients[j] = MP.coefficient(term)
         for i = 1:nvars
             exps[i,j] = MP.degree(term, vars[i])
         end
     end
-    exps, coeffs
+    exps, coefficients
 end
-
-==(p::Poly, q::Poly) = p.exponents == q.exponents && p.coeffs == q.coeffs
 
 "Sorts two vectory by total degree"
 function lt_total_degree(a::Vector{T}, b::Vector{T}) where {T<:Real}
@@ -110,75 +99,88 @@ function lt_total_degree(a::Vector{T}, b::Vector{T}) where {T<:Real}
     false
 end
 
-Base.eltype(p::Poly{T}) where {T} = T
+
 
 """
-    exponents(p::Poly)
+    exponents(p::Polynomial)
 
-Returns the exponents matrix
+Returns the exponents matrix of `p`. Each column represents the exponents of a term of `p`.
 """
-exponents(p::Poly) = p.exponents
-
-"""
-    coeffs(p::Poly)
-
-Returns the coefficient vector
-"""
-coeffs(p::Poly) = p.coeffs
+exponents(p::Polynomial) = p.exponents
 
 """
-    homogenized(p::Poly)
+    coefficients(p::Polynomial)
+
+Returns the coefficient vector of `p`.
+"""
+coefficients(p::Polynomial) = p.coefficients
+
+"""
+    variables(p::Polynomial)
+
+Returns the variables of `p`.
+"""
+variables(p::Polynomial) = p.variables
+
+"""
+    ishomogenized(p::Polynomial)
 
 Checks whether `p` was homogenized.
 """
-homogenized(p::Poly) = p.homogenized
+ishomogenized(p::Polynomial) = p.homogenized
 
 """
-    nterms(p::Poly)
+    nterms(p::Polynomial)
 
 Returns the number of terms of p
 """
-nterms(p::Poly) = size(exponents(p), 2)
+nterms(p::Polynomial) = size(exponents(p), 2)
 
 """
-    nvars(p::Poly)
+    nvariables(p::Polynomial)
 
 Returns the number of variables of p
 """
-nvariables(p::Poly) = size(exponents(p), 1)
+nvariables(p::Polynomial) = size(exponents(p), 1)
 
 """
-    deg(p::Poly)
+    degree(p::Polynomial)
 
-Returns the (total) degree of p
+Returns the (total) degree of p.
 """
-deg(p::Poly) = sum(exponents(p)[:,1])
+degree(p::Polynomial) = sum(exponents(p)[:,1])
+
+
+==(p::Polynomial, q::Polynomial) = exponents(p) == exponents(q) && coefficients(p) == coefficients(q)
+Base.isequal(p::Polynomial, q::Polynomial) = exponents(p) == exponents(q) && coefficients(p) == coefficients(q)
 
 
 # ITERATOR
-start(p::Poly) = (1, nterms(p))
-function next(p::Poly, state::Tuple{Int,Int})
+Base.start(p::Polynomial) = (1, nterms(p))
+function Base.next(p::Polynomial, state::Tuple{Int,Int})
     (i, limit) = state
     newstate = (i + 1, limit)
-    val = (coeffs(p)[i], exponents(p)[:,i])
+    val = (coefficients(p)[i], exponents(p)[:,i])
 
     (val, newstate)
 end
-done(p::Poly, state) = state[1] > state[2]
-length(p::Poly) = nterms(p)
+Base.done(p::Polynomial, state) = state[1] > state[2]
+Base.length(p::Polynomial) = nterms(p)
+Base.eltype(p::Polynomial{T}) where {T} = T
 
 """
-    evaluate(p::Poly, x::AbstractVector)
+    evaluate(p::Polynomial, x::AbstractVector)
 
-Evaluates `p` at `x`, i.e. p(x)
+Evaluates `p` at `x`, i.e. ``p(x)``.
+`Polynomial` is also callable, therefore you can also evaluate it via `p(x)`.
 """
-function evaluate(p::Poly{S}, x::AbstractVector{T}) where {S<:Number, T<:Number}
-    cfs = coeffs(p)
+function evaluate(p::Polynomial{S}, x::AbstractVector{T}) where {S<:Number, T<:Number}
+    cfs = coefficients(p)
     exps = exponents(p)
     nvars, nterms = size(exps)
     res = zero(promote_type(S,T))
     for j = 1:nterms
-        @inbounds term = p.coeffs[j]
+        @inbounds term = p.coefficients[j]
         for i = 1:nvars
             k = exps[i, j]
             @inbounds term *= x[i]^k
@@ -187,20 +189,25 @@ function evaluate(p::Poly{S}, x::AbstractVector{T}) where {S<:Number, T<:Number}
     end
     res
 end
-(p::Poly)(x) = evaluate(p, x)
-
+(p::Polynomial)(x) = evaluate(p, x)
 
 """
-    substitute(p::Poly, i, x)
+    substitute(p::Polynomial, i, x)
 
-Substitute in `p` for the variable with index `i` `x`.
+Substitute in `p` for the variable with index `i` the value `x`. You can use this for partial
+evaluation of polynomial.
+
+### Example
+```
+substitute(x^2+3y, 2, 5) == x^2+15
+```
 """
-function substitute(p::Poly{S}, varindex, x::T) where {S<:Number, T<:Number}
-    cfs = coeffs(p)
+function substitute(p::Polynomial{S}, varindex, x::T) where {S<:Number, T<:Number}
+    cfs = coefficients(p)
     exps = exponents(p)
     nvars, nterms = size(exps)
 
-    new_coeffs = Vector{promote_type(S,T)}()
+    new_coefficients = Vector{promote_type(S,T)}()
     new_exps = Vector{Vector{Int}}()
 
     for j = 1:nterms
@@ -220,29 +227,29 @@ function substitute(p::Poly{S}, varindex, x::T) where {S<:Number, T<:Number}
         found_duplicate = false
         for k = 1:length(new_exps)
             if new_exps[k] == exp
-                new_coeffs[k] += coeff
+                new_coefficients[k] += coeff
                 found_duplicate = true
                 break
             end
         end
         if !found_duplicate
-            push!(new_coeffs, coeff)
+            push!(new_coefficients, coeff)
             push!(new_exps, exp)
         end
     end
 
     # now we have to create a new matrix and return the poly
-    Poly(hcat(new_exps...), new_coeffs, p.homogenized)
+    Polynomial(hcat(new_exps...), new_coefficients, [variables(p)[1:varindex-1]; variables(p)[varindex+1:end]], p.homogenized)
 end
 
 """
-    differentiate(p::Poly, varindex)
+    differentiate(p::Polynomial, varindex::Int)
 
-Differentiates p w.r.t to the `varindex`th variable.
+Differentiate `p` w.r.t the `varindex`th variable.
 """
-function differentiate(p::Poly{T}, i_var) where T
+function differentiate(p::Polynomial{T}, i_var) where T
     exps = copy(exponents(p))
-    cfs = copy(coeffs(p))
+    cfs = copy(coefficients(p))
     n_vars, n_terms = size(exps)
 
     zerocolumns = Int[]
@@ -259,12 +266,12 @@ function differentiate(p::Poly{T}, i_var) where T
     # now we have to get rid of all zeros
     nzeros = length(zerocolumns)
     if nzeros == 0
-        return Poly(exps, cfs, p.homogenized)
+        return Polynomial(exps, cfs, variables(p), p.homogenized)
     end
 
     skipped_cols = 0
     new_exps = zeros(Int, n_vars, n_terms - nzeros)
-    new_coeffs = zeros(T, n_terms - nzeros)
+    new_coefficients = zeros(T, n_terms - nzeros)
 
     for j = 1:n_terms
         # if we not yet have skipped all zero columns
@@ -274,65 +281,70 @@ function differentiate(p::Poly{T}, i_var) where T
         end
 
         new_exps[:, j - skipped_cols] = exps[:, j]
-        new_coeffs[j - skipped_cols] = cfs[j]
+        new_coefficients[j - skipped_cols] = cfs[j]
     end
 
-    Poly(new_exps, new_coeffs, p.homogenized)
+    Polynomial(new_exps, new_coefficients, variables(p), p.homogenized)
 end
 
 
 """
-    differentiate(p::Poly)
+    differentiate(p::Polynomial)
 
-Differentiates Poly `p`. Returns the gradient vector.
+Differentiate `p` w.r.t. all variables.
 """
-differentiate(poly::Poly) = map(i -> differentiate(poly, i), 1:nvariables(poly))
-
-"""
-    ∇(p::Poly)
-
-Returns the gradient vector of `p`.
-"""
-@inline ∇(poly::Poly) = differentiate(poly)
+differentiate(poly::Polynomial) = map(i -> differentiate(poly, i), 1:nvariables(poly))
 
 """
-    ishomogenous(p::Poly)
+    ∇(p::Polynomial)
 
-Checks whether `p` is homogenous.
+Returns the gradient vector of `p`. This is the same as [`differentiate`](@ref).
 """
-function ishomogenous(p::Poly)
+@inline ∇(poly::Polynomial) = differentiate(poly)
+
+"""
+    ishomogenous(p::Polynomial)
+
+Checks whether `p` is a homogenous polynomial. Note that this is unaffected from the
+value of `homogenized(p)`.
+"""
+function ishomogenous(p::Polynomial)
     monomials_degree = sum(exponents(p), 1)
     max_deg = monomials_degree[1]
     all(x -> x == max_deg, monomials_degree)
 end
 
 """
-    homogenize(p::Poly)
+    homogenize(p::Polynomial [, variable = :x0])
 
-Makes `p` homogenous.
+Makes `p` homogenous, if `ishomogenized(p)` is `true` this is just the identity.
+The homogenization variable will always be considered as the first variable of the polynomial.
 """
-function homogenize(p::Poly)
-    if (p.homogenized)
+function homogenize(p::Polynomial, variable::Symbol=:x0)
+    if p.homogenized
         p
     else
         monomials_degree = sum(exponents(p), 1)
         max_deg = monomials_degree[1]
-        Poly([max_deg - monomials_degree; exponents(p)], coeffs(p), homogenized=true)
+        Polynomial([max_deg - monomials_degree; exponents(p)], coefficients(p), [variable; variables(p)], true)
     end
 end
 
 """
-    dehomogenize(p::Poly)
+    dehomogenize(p::Polynomial)
 
-dehomogenizes `p`
+Substitute `1` as for the first variable `p`, if `ishomogenized(p)` is `false` this is just
+the identity.
 """
-dehomogenize(p::Poly) = Poly(exponents(p)[2:end,:], coeffs(p), false)
+function dehomogenize(p::Polynomial)
+    if !p.homogenized
+        p
+    else
+        Polynomial(exponents(p)[2:end,:], coefficients(p), variables(p)[2:end], false)
+    end
+end
 
-"""
-    multinomial(k::Vector{Int})
-
-Computes the multinomial coefficient (|k| \\over k)
-"""
+"Computes the multinomial coefficient (|k| \\over k)"
 function multinomial(k::Vector{Int})
     s = 0
     result = 1
@@ -344,13 +356,16 @@ function multinomial(k::Vector{Int})
 end
 
 """
-    weyldot(f , g)
+    weyldot(f::Polynomial, g::Polynomial)
 
-Compute the Bombieri-Weyl dot product between `Poly`s `f` and `g`.
-Assumes that `f` and `g` are homogenous. See [here](https://en.wikipedia.org/wiki/Bombieri_norm)
-for more details.
+Compute the [Bombieri-Weyl dot product](https://en.wikipedia.org/wiki/Bombieri_norm).
+Note that this is only properly defined if `f` and `g` are homogenous.
+
+    weyldot(f::Vector{Polynomial}, g::Vector{Polynomial})
+
+Compute the dot product for vectors of polynomials.
 """
-function weyldot(f::Poly,g::Poly)
+function weyldot(f::Polynomial,g::Polynomial)
     if (f === g)
         return sum(x -> abs2(x[1]) / multinomial(x[2]), f)
     end
@@ -367,10 +382,15 @@ function weyldot(f::Poly,g::Poly)
     result
 end
 
-"""
-    weylnorm(f::Poly)
+function weyldot(f::Vector{Polynomial{<:Number}}, g::Vector{Polynomial{<:Number}})
+    sum(map(weyldot, f, g))
+end
 
-Compute the Bombieri-Weyl norm for `f`. Assumes that `f` is homogenous.
-See [here](https://en.wikipedia.org/wiki/Bombieri_norm) for more details.
 """
-weylnorm(f::Poly) = √weyldot(f,f)
+    weylnorm(f::Polynomial)
+
+Compute the [Bombieri-Weyl norm](https://en.wikipedia.org/wiki/Bombieri_norm).
+Note that this is only properly defined if `f` is homogenous.
+"""
+weylnorm(f::Polynomial) = √weyldot(f,f)
+weylnorm(f::Vector{Polynomial{<:Number}}) = √weyldot(f,f)

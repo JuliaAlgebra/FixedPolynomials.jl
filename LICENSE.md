@@ -1,4 +1,4 @@
-The FixedPolySystem.jl package is licensed under the MIT "Expat" License:
+The FixedPolynomials.jl package is licensed under the MIT "Expat" License:
 
 > Copyright (c) 2017: Sascha Timme.
 > 

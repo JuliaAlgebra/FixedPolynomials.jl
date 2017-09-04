@@ -1,57 +1,55 @@
 @testset "poly" begin
-    p = FPS.Poly([3 1; 1 1; 0 2], [-2.0, 3.0])
+    p = Polynomial([3 1; 1 1; 0 2], [-2.0, 3.0])
     @test string(p) == "-2.0x₁³x₂+3.0x₁x₂x₃²"
-    @test p isa FPS.Poly{Float64}
+    @test p isa Polynomial{Float64}
     @test eltype(p) == Float64
-    @test FPS.exponents(p) == [3 1; 1 1; 0 2]
-    @test FPS.coeffs(p) == [-2.0, 3.0]
-    @test FPS.nvariables(p) == 3
-    @test FPS.deg(p) == 4
+    @test exponents(p) == [3 1; 1 1; 0 2]
+    @test coefficients(p) == [-2.0, 3.0]
+    @test nvariables(p) == 3
+    @test variables(p) == [:x1, :x2, :x3]
+    @test degree(p) == 4
 
-    @test (convert(FPS.Poly{Complex128}, p) isa FPS.Poly{Complex128})
-    q = FPS.Poly([3 1; 1 1; 0 2], [-2, 3])
+    @test (convert(Polynomial{Complex128}, p) isa Polynomial{Complex128})
+    q = Polynomial([3 1; 1 1; 0 2], [-2, 3], [:x_1, :x_2, :x_3])
     prom_p, prom_q = promote(p,q)
     @test typeof(prom_p) == typeof(prom_q)
-    @test prom_q isa FPS.Poly{Float64}
+    @test prom_q isa Polynomial{Float64}
 
-    Impl.@polyvar x[1:3]
-    f = -2.0x[1]^3*x[2]+3.0x[1]*x[2]*x[3]^2
-    @test "$(FPS.Poly(f))" == "-2.0x₁³x₂+3.0x₁x₂x₃²"
+    Impl.@polyvar z[1:3]
+    f = -2z[1]^3*z[2]+3z[1]*z[2]*z[3]^2
+    @test "$(Polynomial(f))" == "-2z₁³z₂+3z₁z₂z₃²"
+    @test "$(Polynomial{Float64}(f))" == "-2.0z₁³z₂+3.0z₁z₂z₃²"
 
-    @test string(substitute(FPS.Poly(f), 2, 2.0)) == "-4.0x₁³+6.0x₁x₂²"
-    @test string(substitute(FPS.Poly(f), 1, 2.0)) == "6.0x₁x₂²-16.0x₁"
-    @test string(substitute(FPS.Poly(-2.0x[1]^3*x[2]+5.0x[1]^3*x[2]^2), 2, 1.0)) == "3.0x₁³"
+    @test string(substitute(Polynomial(f), 2, 2.0)) == "-4.0z₁³+6.0z₁z₃²"
+    @test string(substitute(Polynomial(f), 1, 2.0)) == "6.0z₂z₃²-16.0z₂"
 
+    @test "$(Polynomial(z[1]))" == "z₁"
+    @test "$(Polynomial(z[1]^2))" == "z₁²"
+    @test "$(Polynomial(2z[1]))" == "2z₁"
 
-    @test "$(FPS.Poly(x[1]))" == "x₁"
-    @test "$(FPS.Poly(x[1]^2))" == "x₁²"
-    @test "$(FPS.Poly(2x[1]))" == "2x₁"
-
-    @test string(FPS.Poly([3 1; 1 1; 0 2], [-2.0, 3.0+2im])) == "-2.0x₁³x₂+(3.0 + 2.0im)x₁x₂x₃²"
-    @test string(FPS.Poly([3 1; 1 1; 0 2], [-2.0, 3.0+0im])) == "-2.0x₁³x₂+3.0x₁x₂x₃²"
-    @test string(FPS.Poly(collect(1:9),[-1.0])) == "-x₁x₂²x₃³x₄⁴x₅⁵x₆⁶x₇⁷x₈⁸x₉⁹"
-
-    q = FPS.Poly([3; 1; 0], [-2.0])
+    q = Polynomial(reshape([3; 1; 0], (3,1)), [-2.0], [:x1, :x2, :x3])
     @test q([1, 2.0, 3.0]) == -4
-    q = FPS.Poly(reshape([1; 1; 2],(3,1)), [3.0])
+    q = Polynomial(reshape([1; 1; 2],(3,1)), [3.0], [:x1, :x2, :x3])
     @test q([1, 2.0, 3.0]) == 54
     @test p([1, 2.0, 3.0]) == 50
 
-    @test FPS.differentiate(p, 1) == FPS.Poly([2 0; 1 1; 0 2], [-6.0, 3.0])
-    @test FPS.differentiate(p) == [FPS.differentiate(p, 1), FPS.differentiate(p, 2), FPS.differentiate(p, 3)]
+    @test differentiate(p, 1) == Polynomial([2 0; 1 1; 0 2], [-6.0, 3.0], [:x1, :x2])
+    @test differentiate(p) == [differentiate(p, 1), differentiate(p, 2), differentiate(p, 3)]
     Impl.@polyvar y z
-    @test size(FPS.differentiate(FPS.Poly(z^2+2+y), 1).exponents) == (2, 1)
-    @test size(FPS.differentiate(FPS.Poly(z^2+2+y), 2).exponents) == (2, 1)
+    @test size(differentiate(Polynomial(z^2+2+y), 1).exponents) == (2, 1)
+    @test size(differentiate(Polynomial(z^2+2+y), 2).exponents) == (2, 1)
 
 
-    @test FPS.ishomogenous(p) == true
-    @test string(FPS.homogenize(FPS.Poly([1 1; 0 2], [-2.0, 3.0]))) == "-2.0x₀²x₁+3.0x₁x₂²"
-    @test FPS.dehomogenize(p) == FPS.Poly([1 1; 0 2], [-2.0, 3.0])
+    @test ishomogenous(p) == true
+    @test string(homogenize(Polynomial([1 1; 0 2], [-2.0, 3.0]))) == "-2.0x₀²x₁+3.0x₁x₂²"
+    @test dehomogenize(p) == p
+    @test dehomogenize(homogenize(p)) == p
 
+    exponents(homogenize(p))[2:end, :]
 
-    f = FPS.Poly([2 1 0;0 1 2], [3.0, 2.0, -1.0])
-    g = FPS.Poly([2 1 0;0 1 2], [-2.5+2im,-3.0, 4.0])
-    @test FPS.weyldot(f,g) == 3.0 * conj(-2.5 + 2im) + 2.0 * (-3.0) / 2 + (-1.0) * 4.0
-    @test FPS.weyldot(f, f) == 9.0 + 4.0  / 2 + 1.0
-    @test FPS.weylnorm(f)^2 ≈ FPS.weyldot(f,f)
+    f = Polynomial([2 1 0;0 1 2], [3.0, 2.0, -1.0])
+    g = Polynomial([2 1 0;0 1 2], [-2.5+2im,-3.0, 4.0])
+    @test weyldot(f,g) == 3.0 * conj(-2.5 + 2im) + 2.0 * (-3.0) / 2 + (-1.0) * 4.0
+    @test weyldot(f, f) == 9.0 + 4.0  / 2 + 1.0
+    @test weylnorm(f)^2 ≈ weyldot(f,f)
 end

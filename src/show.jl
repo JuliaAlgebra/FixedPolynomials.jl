@@ -1,27 +1,27 @@
 import Base: print
 
-function show(io::IO, p::Poly)
-    if p.homogenized
-        vars = ["x$i" for i=0:nvariables(p)-1]
-    else
-        vars = ["x$i" for i=1:nvariables(p)]
-    end
-    print_poly(io, p, vars)
+function Base.show(io::IO, p::Polynomial)
+    # if p.homogenized
+    #     vars = ["x$i" for i=0:nvariables(p)-1]
+    # else
+    #     vars = ["x$i" for i=1:nvariables(p)]
+    # end
+    print_poly(io, p, variables(p))
 end
 
-function show(io::IO, P::PolySystem)
-    for p in P.polys
-        print_poly(io, p, P.vars)
-        print(io, "\n")
-    end
-end
+# function Base.show(io::IO, P::PolynomialSystem)
+#     for p in P.polys
+#         print_poly(io, p, P.vars)
+#         print(io, "\n")
+#     end
+# end
 
 #helpers
 
-function print_poly(io::IO, p::Poly{T}, vars) where T
+function print_poly(io::IO, p::Polynomial{T}, vars) where T
     first = true
     exps = exponents(p)
-    cfs = coeffs(p)
+    cfs = coefficients(p)
 
     m, n = size(exps)
 
