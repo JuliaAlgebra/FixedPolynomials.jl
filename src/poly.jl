@@ -31,6 +31,9 @@ struct Poly{T<:Number}
         new(exponents[:, sorted_cols], coeffs[sorted_cols], homogenized)
     end
 end
+function Poly{T}(exponents::Matrix{Int}, coeffs::Vector{S}, homogenized::Bool) where {T<:Number, S<:Number}
+    Poly{T}(exponents, convert(Vector{T}, coeffs), homogenized)
+end
 function Poly(exponents::Matrix{Int}, coeffs::Vector{T}, homogenized::Bool) where {T<:Number}
     Poly{T}(exponents, coeffs, homogenized)
 end
@@ -54,6 +57,18 @@ function Poly(p::MP.AbstractPolynomial{T}) where T
 end
 Poly(p::MP.AbstractPolynomialLike, vars) = Poly(MP.polynomial(p), vars)
 Poly(p::MP.AbstractPolynomialLike) = Poly(MP.polynomial(p))
+
+function Poly{T}(p::MP.AbstractPolynomial, vars) where {T}
+    exps, coeffs = coeffs_exponents(p, vars)
+    Poly{T}(exps, coeffs, false)
+end
+
+function Poly{T}(p::MP.AbstractPolynomial) where T
+    exps, coeffs = coeffs_exponents(p, MP.variables(p))
+    Poly{T}(exps, coeffs, false)
+end
+Poly{T}(p::MP.AbstractPolynomialLike, vars) where T = Poly{T}(MP.polynomial(p), vars)
+Poly{T}(p::MP.AbstractPolynomialLike) where T= Poly{T}(MP.polynomial(p))
 
 coefftype(::Poly{T}) where T = T
 
@@ -163,10 +178,10 @@ function evaluate(p::Poly{S}, x::AbstractVector{T}) where {S<:Number, T<:Number}
     nvars, nterms = size(exps)
     res = zero(promote_type(S,T))
     for j = 1:nterms
-        term = cfs[j]
+        @inbounds term = p.coeffs[j]
         for i = 1:nvars
             k = exps[i, j]
-            term *= x[i]^k
+            @inbounds term *= x[i]^k
         end
         res += term
     end
