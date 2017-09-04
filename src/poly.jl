@@ -382,7 +382,7 @@ function weyldot(f::Polynomial,g::Polynomial)
     result
 end
 
-function weyldot(f::Vector{Polynomial{<:Number}}, g::Vector{Polynomial{<:Number}})
+function weyldot(f::Vector{Polynomial{T}}, g::Vector{Polynomial{S}}) where {T,S}
     sum(map(weyldot, f, g))
 end
 
@@ -393,4 +393,4 @@ Compute the [Bombieri-Weyl norm](https://en.wikipedia.org/wiki/Bombieri_norm).
 Note that this is only properly defined if `f` is homogenous.
 """
 weylnorm(f::Polynomial) = √weyldot(f,f)
-weylnorm(f::Vector{Polynomial{<:Number}}) = √weyldot(f,f)
+weylnorm(f::Vector{Polynomial{T}}) where T = √weyldot(f,f)

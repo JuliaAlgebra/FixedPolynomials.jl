@@ -123,7 +123,7 @@ show_plus(x::Complex) = x != -1
 
 show_coeff(io::IO, x::Real) = print(io, x)
 function show_coeff(io::IO, x::Complex)
-    if imag(x) ≈ 0
+    if imag(x) == 0.0
         print(io, convert(Float64, x))
     else
         print(io, "($(x))")
