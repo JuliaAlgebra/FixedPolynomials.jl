@@ -28,6 +28,12 @@
     @test "$(Polynomial(z[1]^2))" == "z₁²"
     @test "$(Polynomial(2z[1]))" == "2z₁"
 
+    f, g = promote(Polynomial(2z[1]), Polynomial(3.0z[1]))
+    @test f isa Polynomial{Float64}
+    @test g isa Polynomial{Float64}
+
+    @test promote_type(Polynomial{Int64}, Float64) == Polynomial{Float64}
+
     @test string(Polynomial(reshape(collect(1:9), (9,1)), [1.0])) == "x₁x₂²x₃³x₄⁴x₅⁵x₆⁶x₇⁷x₈⁸x₉⁹"
     @test string(Polynomial((2.3+0im)*z[1] - (2.2-2.2im) * z[2])) == "2.3z₁+(-2.2 + 2.2im)z₂"
 
@@ -51,6 +57,7 @@
     @test ishomogenized(homogenize(p)) == true
     @test dehomogenize(p) == p
     @test dehomogenize(homogenize(p)) == p
+    @test dehomogenize(homogenize(homogenize(p))) == p
 
     exponents(homogenize(p))[2:end, :]
 
