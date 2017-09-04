@@ -6,14 +6,9 @@ export Polynomial, exponents, coefficients, variables, nvariables, nterms,
     Polynomial(p::MultivariatePolynomials.AbstractPolynomial [, variables [, homogenized=false]])
 
 A structure for fast evaluation of multivariate polynomials.
-
-### Fields
-* `exponents::Matrix{Int}`: Each column represents the exponent of a term. The columns are sorted first by total degree, then lexicographically.
-* `coefficients::Vector{T}`: List of the coefficients.
-* `variables::Vector{Symbol}`: List of the variables of the polynomial.
-* `homogenized::Bool`: `Polynomial` has first class support
-for [homogenous polynomials](https://en.wikipedia.org/wiki/Homogeneous_polynomial).
-This field indicats whether the first variable should be considered as the homogenization variable.
+The terms are sorted first by total degree, then lexicographically.
+`Polynomial` has first class support for [homogenous polynomials](https://en.wikipedia.org/wiki/Homogeneous_polynomial).
+This field indicates whether the first variable should be considered as the homogenization variable.
 
 
     Polynomial{T}(p::MultivariatePolynomials.AbstractPolynomial [, variables [, homogenized=false]])
@@ -29,7 +24,7 @@ You can also create a polynomial directly. Note that in exponents each column re
 
 ### Example
 ```
-Poly([3 1; 1 1: 0 2 ], [-2.0, 3.0], [:x, :y, :z]) == 3.0x^2yz^2 - 2x^3y
+Poly([3 1; 1 1; 0 2 ], [-2.0, 3.0], [:x, :y, :z]) == 3.0x^2yz^2 - 2x^3y
 ```
 """
 struct Polynomial{T<:Number}
@@ -98,8 +93,6 @@ function lt_total_degree(a::Vector{T}, b::Vector{T}) where {T<:Real}
     end
     false
 end
-
-
 
 """
     exponents(p::Polynomial)
@@ -246,6 +239,11 @@ end
     differentiate(p::Polynomial, varindex::Int)
 
 Differentiate `p` w.r.t the `varindex`th variable.
+
+
+    differentiate(p::Polynomial)
+
+Differentiate `p` w.r.t. all variables.
 """
 function differentiate(p::Polynomial{T}, i_var) where T
     exps = copy(exponents(p))
@@ -286,13 +284,6 @@ function differentiate(p::Polynomial{T}, i_var) where T
 
     Polynomial(new_exps, new_coefficients, variables(p), p.homogenized)
 end
-
-
-"""
-    differentiate(p::Polynomial)
-
-Differentiate `p` w.r.t. all variables.
-"""
 differentiate(poly::Polynomial) = map(i -> differentiate(poly, i), 1:nvariables(poly))
 
 """
