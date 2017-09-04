@@ -35,17 +35,17 @@
     @test q([1, 2.0, 3.0]) == -4
     q = FPS.Poly(reshape([1; 1; 2],(3,1)), [3.0])
     @test q([1, 2.0, 3.0]) == 54
-
     @test p([1, 2.0, 3.0]) == 50
 
     @test FPS.differentiate(p, 1) == FPS.Poly([2 0; 1 1; 0 2], [-6.0, 3.0])
-
     @test FPS.differentiate(p) == [FPS.differentiate(p, 1), FPS.differentiate(p, 2), FPS.differentiate(p, 3)]
+    Impl.@polyvar y z
+    @test size(FPS.differentiate(FPS.Poly(z^2+2+y), 1).exponents) == (2, 1)
+    @test size(FPS.differentiate(FPS.Poly(z^2+2+y), 2).exponents) == (2, 1)
+
 
     @test FPS.ishomogenous(p) == true
-
     @test string(FPS.homogenize(FPS.Poly([1 1; 0 2], [-2.0, 3.0]))) == "-2.0x₀²x₁+3.0x₁x₂²"
-
     @test FPS.dehomogenize(p) == FPS.Poly([1 1; 0 2], [-2.0, 3.0])
 
 

@@ -31,6 +31,9 @@ struct Poly{T<:Number}
         new(exponents[:, sorted_cols], coeffs[sorted_cols], homogenized)
     end
 end
+function Poly{T}(exponents::Matrix{Int}, coeffs::Vector{S}, homogenized::Bool) where {T<:Number, S<:Number}
+    Poly{T}(exponents, convert(Vector{T}, coeffs), homogenized)
+end
 function Poly(exponents::Matrix{Int}, coeffs::Vector{T}, homogenized::Bool) where {T<:Number}
     Poly{T}(exponents, coeffs, homogenized)
 end
@@ -54,6 +57,18 @@ function Poly(p::MP.AbstractPolynomial{T}) where T
 end
 Poly(p::MP.AbstractPolynomialLike, vars) = Poly(MP.polynomial(p), vars)
 Poly(p::MP.AbstractPolynomialLike) = Poly(MP.polynomial(p))
+
+function Poly{T}(p::MP.AbstractPolynomial, vars) where {T}
+    exps, coeffs = coeffs_exponents(p, vars)
+    Poly{T}(exps, coeffs, false)
+end
+
+function Poly{T}(p::MP.AbstractPolynomial) where T
+    exps, coeffs = coeffs_exponents(p, MP.variables(p))
+    Poly{T}(exps, coeffs, false)
+end
+Poly{T}(p::MP.AbstractPolynomialLike, vars) where T = Poly{T}(MP.polynomial(p), vars)
+Poly{T}(p::MP.AbstractPolynomialLike) where T= Poly{T}(MP.polynomial(p))
 
 coefftype(::Poly{T}) where T = T
 
@@ -163,10 +178,10 @@ function evaluate(p::Poly{S}, x::AbstractVector{T}) where {S<:Number, T<:Number}
     nvars, nterms = size(exps)
     res = zero(promote_type(S,T))
     for j = 1:nterms
-        term = cfs[j]
+        @inbounds term = p.coeffs[j]
         for i = 1:nvars
             k = exps[i, j]
-            term *= x[i]^k
+            @inbounds term *= x[i]^k
         end
         res += term
     end
@@ -225,22 +240,44 @@ end
 
 Differentiates p w.r.t to the `varindex`th variable.
 """
-function differentiate(p::Poly, i_var)
+function differentiate(p::Poly{T}, i_var) where T
     exps = copy(exponents(p))
+    cfs = copy(coeffs(p))
     n_vars, n_terms = size(exps)
 
-    cfs = copy(coeffs(p))
+    zerocolumns = Int[]
     for j=1:n_terms
         k = exps[i_var, j]
         if k > 0
             exps[i_var, j] = max(0, k - 1)
             cfs[j] *= k
         else
-            exps[:,j] = zeros(Int, n_vars, 1)
-            cfs[j] = zero(eltype(p))
+            push!(zerocolumns , j)
         end
     end
-    Poly(exps, cfs, p.homogenized)
+
+    # now we have to get rid of all zeros
+    nzeros = length(zerocolumns)
+    if nzeros == 0
+        return Poly(exps, cfs, p.homogenized)
+    end
+
+    skipped_cols = 0
+    new_exps = zeros(Int, n_vars, n_terms - nzeros)
+    new_coeffs = zeros(T, n_terms - nzeros)
+
+    for j = 1:n_terms
+        # if we not yet have skipped all zero columns
+        if skipped_cols < nzeros && j == zerocolumns[skipped_cols+1]
+            skipped_cols += 1
+            continue
+        end
+
+        new_exps[:, j - skipped_cols] = exps[:, j]
+        new_coeffs[j - skipped_cols] = cfs[j]
+    end
+
+    Poly(new_exps, new_coeffs, p.homogenized)
 end
 
 
@@ -251,6 +288,12 @@ Differentiates Poly `p`. Returns the gradient vector.
 """
 differentiate(poly::Poly) = map(i -> differentiate(poly, i), 1:nvariables(poly))
 
+"""
+    ∇(p::Poly)
+
+Returns the gradient vector of `p`.
+"""
+@inline ∇(poly::Poly) = differentiate(poly)
 
 """
     ishomogenous(p::Poly)

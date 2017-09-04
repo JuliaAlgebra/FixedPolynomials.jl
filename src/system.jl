@@ -150,6 +150,20 @@ function differentiate(P::PolySystem{T}) where {T<:Number}
 end
 
 """
+    differentiate!(P::PolySystem)
+
+Inplace version of [differentiate](@ref). Returns an evaluation function `(x, u) -> u := J_P(x)`.
+"""
+function differentiate!(P::PolySystem{T}) where {T<:Number}
+	m = length(P)
+	n = nvariables(P)
+	polys = polynomials(P)
+	jacobian = [differentiate(polys[i], j) for i=1:m,j=1:n]
+
+	(x, u) -> map!(p -> p(x), u, jacobian)
+end
+
+"""
     ishomogenous(P::PolySystem)
 
 Checks whether every polynomial of `P` is homogenous.
