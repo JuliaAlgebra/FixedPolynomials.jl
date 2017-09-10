@@ -1,5 +1,5 @@
 export Polynomial, exponents, coefficients, variables, nvariables, nterms,
-    ishomogenized, ishomogenous, homogenize, dehomogenize, degree, evaluate,
+    ishomogenized, ishomogenous, homogenize, dehomogenize, degree, evaluate, substitute,
     differentiate, ∇, weylnorm, weyldot
 
 """

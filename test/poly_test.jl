@@ -35,6 +35,11 @@
     @test promote_type(Polynomial{Int64}, Float64) == Polynomial{Float64}
     @test promote_type(Polynomial{Int64}, Polynomial{Float64}) == Polynomial{Float64}
 
+    F = convert(Vector{Polynomial{Float64}}, [2z[2], 3z[1]])
+    @test nvariables(F[1]) == 2
+    @test nvariables(F[2]) == 2
+    @test variables(F[1]) == [:z1, :z2]
+
     @test string(Polynomial(reshape(collect(1:9), (9,1)), [1.0])) == "x₁x₂²x₃³x₄⁴x₅⁵x₆⁶x₇⁷x₈⁸x₉⁹"
     @test string(Polynomial((2.3+0im)*z[1] - (2.2-2.2im) * z[2])) == "2.3z₁+(-2.2 + 2.2im)z₂"
 

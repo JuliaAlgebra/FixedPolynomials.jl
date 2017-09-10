@@ -7,14 +7,6 @@ module FixedPolynomials
     export AbstractPolySystem
 
     include("poly.jl")
-    #include("system.jl")
     include("show.jl")
     include("convert_promote.jl")
-
-    export Poly, PolySystem,
-        nvariables, variables, polynomials, degrees,
-        evaluate, evaluate!, substitute, removepoly, differentiate, ∇, differentiate!,
-        ishomogenous, homogenize, homogenized, dehomogenize,
-        weyldot, weylnorm, coefftype
-
 end
