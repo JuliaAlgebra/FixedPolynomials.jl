@@ -191,8 +191,9 @@ Substitute in `p` for the variable with index `i` the value `x`. You can use thi
 evaluation of polynomial.
 
 ### Example
-```
-substitute(x^2+3y, 2, 5) == x^2+15
+```julia-repl
+julia> substitute(x^2+3y, 2, 5)
+x^2+15
 ```
 """
 function substitute(p::Polynomial{S}, varindex, x::T) where {S<:Number, T<:Number}
