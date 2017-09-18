@@ -33,9 +33,25 @@ struct Polynomial{T<:Number}
     variables::Vector{Symbol}
     homogenized::Bool
 
+    # this are only internal data structures to avoid allocations
+    _phi::Matrix{Int}
+    _sorteddiff::Matrix{Int}
+    _values::Matrix{T}
+
     function Polynomial{T}(exponents::Matrix{Int}, coefficients::Vector{T}, variables::Vector{Symbol}, homogenized::Bool) where {T<:Number}
         sorted_cols = sort!([1:size(exponents,2);], lt=((i, j) -> lt_total_degree(exponents[:,i], exponents[:,j])), rev=true)
-        new(exponents[:, sorted_cols], coefficients[sorted_cols], variables, homogenized)
+
+        exps = exponents[:, sorted_cols]
+        coeffs = coefficients[sorted_cols]
+
+        psi = vcat([sortperm(exps[k,:])' for k=1:size(exps, 1)]...)
+        phi = [findfirst(x -> x == j, psi[i,:]) for i=1:size(exps, 1), j=1:size(exps, 2)]
+        sorted = vcat([sort(exps[i,:])' for i in 1:size(exps,1)]...)
+        sorteddiff = sorted
+        sorteddiff[:,2:end] -= sorteddiff[:,1:end-1]
+        values = zeros(T, size(exps))
+
+        new(exps, coeffs, variables, homogenized, phi, sorteddiff, values)
     end
 end
 
@@ -168,15 +184,27 @@ Evaluates `p` at `x`, i.e. ``p(x)``.
 `Polynomial` is also callable, therefore you can also evaluate it via `p(x)`.
 """
 function evaluate(p::Polynomial{S}, x::AbstractVector{T}) where {S<:Number, T<:Number}
-    cfs = coefficients(p)
-    exps = exponents(p)
-    nvars, nterms = size(exps)
-    res = zero(promote_type(S,T))
-    for j = 1:nterms
-        @inbounds term = p.coefficients[j]
-        for i = 1:nvars
-            k = exps[i, j]
-            @inbounds term *= x[i]^k
+    m, n = size(p.exponents)
+    values = p._values
+    sorteddiff = p._sorteddiff
+    phi = p._phi
+
+    for i = 1:m
+        @inbounds values[i,1] = x[i]^sorteddiff[i,1]
+    end
+
+    for i=1:m, k=2:n
+        @inbounds l = sorteddiff[i,k]
+        @inbounds v = values[i,k - 1]
+        @inbounds values[i,k] = l == 0 ? v : (l == 1 ? v * x[i] : v * x[i]^sorteddiff[i,k])
+    end
+
+    res = 0.0
+    c = p.coefficients
+    for k = 1:n
+        @inbounds term = c[k]
+        for i = 1:m
+            @inbounds term *= p._values[i, phi[i,k]]
         end
         res += term
     end
