@@ -34,6 +34,13 @@ struct Polynomial{T<:Number}
     homogenized::Bool
 
     # this are only internal data structures to avoid allocations
+    # Let M the exponents matrix. Then we can associate a matrix M' in which each
+    # row of m was sorted separetly in ascending order.
+    # `_phi` is the  map from M' to M s.t. M[i,j] == M'[i, _phi[i,j]]
+    # For each row of M' we can only store the difference to the previous value.
+    # This is `_sorteddiff`.
+    # To evaluate a polynomial we then use '_phi' and '_sorteddiff' to compute the matrix
+    # `x.^M` and store the result in `_values`.
     _phi::Matrix{Int}
     _sorteddiff::Matrix{Int}
     _values::Matrix{T}
