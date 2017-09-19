@@ -125,7 +125,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Reference",
     "title": "FixedPolynomials.evaluate",
     "category": "Function",
-    "text": "evaluate(p::Polynomial, x::AbstractVector)\n\nEvaluates p at x, i.e. p(x). Polynomial is also callable, therefore you can also evaluate it via p(x).\n\n\n\n"
+    "text": "evaluate(p::Polynomial{T}, x::AbstractVector{T})\n\nEvaluates p at x, i.e. p(x). Polynomial is also callable, i.e. you can also evaluate it via p(x).\n\n\n\n"
 },
 
 {
