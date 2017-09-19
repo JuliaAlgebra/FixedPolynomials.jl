@@ -185,13 +185,17 @@ Base.length(p::Polynomial) = nterms(p)
 Base.eltype(p::Polynomial{T}) where {T} = T
 
 """
-    evaluate(p::Polynomial, x::AbstractVector)
+    evaluate(p::Polynomial{T}, x::AbstractVector{T})
 
 Evaluates `p` at `x`, i.e. ``p(x)``.
-`Polynomial` is also callable, therefore you can also evaluate it via `p(x)`.
+`Polynomial` is also callable, i.e. you can also evaluate it via `p(x)`.
 """
-function evaluate(p::Polynomial{S}, x::AbstractVector{T}) where {S<:Number, T<:Number}
+function evaluate(p::Polynomial{T}, x::AbstractVector{T}) where {T<:Number}
     m, n = size(p.exponents)
+    # handle zero polynomial
+    if n == 0
+        return zero(T)
+    end
     values = p._values
     sorteddiff = p._sorteddiff
     phi = p._phi
