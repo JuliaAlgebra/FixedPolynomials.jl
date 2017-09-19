@@ -224,7 +224,7 @@ end
 """
     substitute(p::Polynomial, i, x)
 
-Substitute in `p` for the variable with index `i` the value `x`. You can use this for partial
+In `p` substitute for the variable with index `i` the value `x`. You can use this for partial
 evaluation of polynomial.
 
 ### Example
