@@ -196,12 +196,10 @@ function evaluate(p::Polynomial{S}, x::AbstractVector{T}) where {S<:Number, T<:N
     sorteddiff = p._sorteddiff
     phi = p._phi
 
-    for i = 1:m
-        @inbounds values[i,1] = x[i]^sorteddiff[i,1]
-    end
-
     for i=1:m
-        @inbounds v = values[i, 1]
+        @inbounds l = sorteddiff[i,1]
+        @inbounds v = l == 0 ? one(T) : (l == 1 ? x[i] : x[i]^l)
+        @inbounds values[i, 1] = v
         for k=2:n
             @inbounds l = sorteddiff[i,k]
             @inbounds v = l == 0 ? v : (l == 1 ? v * x[i] : v * x[i]^l)
@@ -220,6 +218,7 @@ function evaluate(p::Polynomial{S}, x::AbstractVector{T}) where {S<:Number, T<:N
     end
     res
 end
+
 (p::Polynomial)(x) = evaluate(p, x)
 
 """
