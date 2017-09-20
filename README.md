@@ -7,7 +7,7 @@
 
 [FixedPolynomials.jl](https://github.com/saschatimme/FixedPolynomials.jl) is a library for
 *really fast* evaluation of multivariate polynomials.
-[Here](https://github.com/saschatimme/FixedPolynomials.jl/pull/3) are the latest benchmark results.
+The latest benchmark results can be found [here](https://github.com/saschatimme/FixedPolynomials.jl/pull/3).
 
 Since `FixedPolynomials` polynomials are optimised for fast evaluation they are not suited
 for construction of polynomials.
