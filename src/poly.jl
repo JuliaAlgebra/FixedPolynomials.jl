@@ -359,7 +359,7 @@ function homogenize(p::Polynomial, variable::Symbol=:x0)
     else
         monomials_degree = sum(exponents(p), 1)
         max_deg = monomials_degree[1]
-        Polynomial([max_deg - monomials_degree; exponents(p)], coefficients(p), [variable; variables(p)], true)
+        Polynomial([max_deg .- monomials_degree; exponents(p)], coefficients(p), [variable; variables(p)], true)
     end
 end
 
