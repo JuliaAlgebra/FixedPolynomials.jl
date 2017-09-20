@@ -1,3 +1,5 @@
+__precompile__()
+
 module FixedPolynomials
     import MultivariatePolynomials
     const MP = MultivariatePolynomials
