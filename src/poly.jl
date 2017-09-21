@@ -211,7 +211,7 @@ function evaluate(p::Polynomial{T}, x::AbstractVector{T}) where {T<:Number}
         end
     end
 
-    res = 0.0
+    res = zero(T)
     c = p.coefficients
     for k = 1:n
         @inbounds term = c[k]
