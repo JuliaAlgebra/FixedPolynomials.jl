@@ -12,5 +12,6 @@ module FixedPolynomials
     include("poly.jl")
     include("show.jl")
     include("convert_promote.jl")
+    include("polynomialarray.jl")
 
 end

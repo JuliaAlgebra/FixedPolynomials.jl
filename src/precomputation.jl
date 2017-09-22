@@ -9,11 +9,11 @@ Each row is filled with the unique occuring exponents ``e_1,…,e_{k_i}`` if ``k
 the rest is filled with zeros.
 """
 function unique_exponents(exponents::Vector{Matrix{Int}})
-    m, n = size(first(exponents))
+    m = size(first(exponents), 1)
     sets = map(1:m) do i
         # collect all exponents of the i-th variable
         set = Set{Int}()
-        for k = 1:length(exponents), j = 1:n
+        for k = 1:length(exponents), j = 1:size(exponents[k], 2)
              push!(set, exponents[k][i, j])
         end
         set
