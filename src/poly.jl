@@ -41,8 +41,8 @@ struct Polynomial{T<:Number}
     # This is `_sorteddiff`.
     # To evaluate a polynomial we then use '_phi' and '_sorteddiff' to compute the matrix
     # `x.^M` and store the result in `_values`.
-    _phi::Matrix{Int}
-    _sorteddiff::Matrix{Int}
+    _lookuptable::Matrix{Int}
+    _differences::Matrix{Int}
     _values::Matrix{T}
 
     function Polynomial{T}(exponents::Matrix{Int}, coefficients::Vector{T}, variables::Vector{Symbol}, homogenized::Bool) where {T<:Number}
@@ -51,14 +51,12 @@ struct Polynomial{T<:Number}
         exps = exponents[:, sorted_cols]
         coeffs = coefficients[sorted_cols]
 
-        psi = vcat([sortperm(exps[k,:])' for k=1:size(exps, 1)]...)
-        phi = [findfirst(x -> x == j, psi[i,:]) for i=1:size(exps, 1), j=1:size(exps, 2)]
-        sorted = vcat([sort(exps[i,:])' for i in 1:size(exps,1)]...)
-        sorteddiff = sorted
-        sorteddiff[:,2:end] -= sorteddiff[:,1:end-1]
-        values = zeros(T, size(exps))
+        ue = unique_exponents(exps)
+        _lookuptable = lookuptable(exps, ue)
+        _differences = differences!(ue)
+        _values = similar(_differences, T)
 
-        new(exps, coeffs, variables, homogenized, phi, sorteddiff, values)
+        new(exps, coeffs, variables, homogenized, _lookuptable, _differences, _values)
     end
 end
 
@@ -191,36 +189,8 @@ Evaluates `p` at `x`, i.e. ``p(x)``.
 `Polynomial` is also callable, i.e. you can also evaluate it via `p(x)`.
 """
 function evaluate(p::Polynomial{T}, x::AbstractVector{T}) where {T<:Number}
-    m, n = size(p.exponents)
-    # handle zero polynomial
-    if n == 0
-        return zero(T)
-    end
-    values = p._values
-    sorteddiff = p._sorteddiff
-    phi = p._phi
-
-    for i=1:m
-        @inbounds l = sorteddiff[i,1]
-        @inbounds v = l == 0 ? one(T) : (l == 1 ? x[i] : x[i]^l)
-        @inbounds values[i, 1] = v
-        for k=2:n
-            @inbounds l = sorteddiff[i,k]
-            @inbounds v = l == 0 ? v : (l == 1 ? v * x[i] : v * x[i]^l)
-            @inbounds values[i,k] = v
-        end
-    end
-
-    res = zero(T)
-    c = p.coefficients
-    for k = 1:n
-        @inbounds term = c[k]
-        for i = 1:m
-            @inbounds term *= values[i, phi[i,k]]
-        end
-        res += term
-    end
-    res
+    fillvalues!(p._values, p._differences, x)
+    evaluate_lookuptable(p._lookuptable, p._values, p.coefficients)
 end
 
 (p::Polynomial)(x) = evaluate(p, x)
