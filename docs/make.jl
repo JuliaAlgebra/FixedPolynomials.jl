@@ -5,7 +5,8 @@ makedocs(
     sitename = "FixedPolynomials.jl",
     pages = [
         "Introduction" => "index.md",
-        "Reference" => "reference.md",
+        "Polynomial" => "reference.md",
+        "PolynomialEvaluationArray" => "polynomialevaluationarray.md"
         ]
 )
 

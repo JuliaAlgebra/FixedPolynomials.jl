@@ -1,11 +1,11 @@
-export PolynomialEvaluationArray, fillvalues!, evaluate!, unsafe_evaluate
+export PolynomialEvaluationArray, precompute!, evaluate!, unsafe_evaluate
 
 """
     PolynomialEvaluationArray(polynomials::Array{Polynomial{T}, N})
 
 A structure for the fast evaluation of the given array `polynomials` of polynomials.
-This provides a speedup about the evaluation of the polynomials separetly since it
-shares as much computations as possible over all polynomials.
+This provides a speedup about the separete evaluation of the polynomials since
+as much computations as possible are shared over all polynomials of the array.
 """
 struct PolynomialEvaluationArray{T, N}
     coefficients::Array{Vector{T}, N}
@@ -28,33 +28,33 @@ function PolynomialEvaluationArray(polynomials::Array{Polynomial{T}, N}) where {
 end
 
 """
-    precompute!(pea::PolynomialEvaluationArray{T}, x::AbstractVector{T})
+    precompute!(PEA::PolynomialEvaluationArray{T}, x::AbstractVector{T})
 
-Precompute values for the evaluation of `pea` at `x`.
+Precompute values for the evaluation of `PEA` at `x`.
 """
-@inline function precompute!(pea::PolynomialEvaluationArray{T}, x::AbstractVector{T}) where T
-    fillvalues!(pea.values, pea.diffs, x)
+@inline function precompute!(PEA::PolynomialEvaluationArray{T}, x::AbstractVector{T}) where T
+    fillvalues!(PEA.values, PEA.diffs, x)
 end
 
 """
-    evaluate!(u::AbstractArray{T,N}, pea::PolynomialEvaluationArray{T,N}, x::AbstractVector{T})
+    evaluate!(u::AbstractArray{T,N}, PEA::PolynomialEvaluationArray{T,N}, x::AbstractVector{T})
 
-Evaluate `pea` at `x` and store the result in `u`. This will result in a call to [precompute!](@ref).
+Evaluate `PEA` at `x` and store the result in `u`. This will result in a call to [`precompute!`](@ref).
 """
-function evaluate!(u::AbstractArray{T,N}, pea::PolynomialEvaluationArray{T,N}, x::AbstractVector{T}) where {T,N}
-    precompute!(pea, x)
-    for l in eachindex(pea.lookuptables)
-        lookuptable = pea.lookuptables[l]
-        coefficients = pea.coefficients[l]
-        u[l] = evaluate_lookuptable(lookuptable, pea.values, coefficients)
+function evaluate!(u::AbstractArray{T,N}, PEA::PolynomialEvaluationArray{T,N}, x::AbstractVector{T}) where {T,N}
+    precompute!(PEA, x)
+    for l in eachindex(PEA.lookuptables)
+        lookuptable = PEA.lookuptables[l]
+        coefficients = PEA.coefficients[l]
+        u[l] = evaluate_lookuptable(lookuptable, PEA.values, coefficients)
     end
     u
 end
 
 """
-    unsafe_evaluate(pea::PolynomialEvaluationArray{T,N}, I::Vararg{Int,N})
+    unsafe_evaluate(PEA::PolynomialEvaluationArray{T,N}, I::Vararg{Int,N})
 
-Evaluate the polynomial with index `I` in `pea` for the value `x` for which the last call to [precompute!](@ref)
+Evaluate the polynomial with index `I` in `PEA` for the value `x` for which the last call to [`precompute!`](@ref)
 occured.
 
 ### Example
@@ -66,13 +66,13 @@ unsafe_evaluate(F, 1, 2) == evaluate(f2, x)
 unsafe_evaluate(F, 2, 2) == evaluate(f4, x)
 ```
 """
-function unsafe_evaluate(pea::PolynomialEvaluationArray{T,N}, I::Vararg{Int,N}) where {T,N}
-    lookuptable = pea.lookuptables[I...]
-    coefficients = pea.coefficients[I...]
-    evaluate_lookuptable(lookuptable, pea.values, coefficients)
+function unsafe_evaluate(PEA::PolynomialEvaluationArray{T,N}, I::Vararg{Int,N}) where {T,N}
+    lookuptable = PEA.lookuptables[I...]
+    coefficients = PEA.coefficients[I...]
+    evaluate_lookuptable(lookuptable, PEA.values, coefficients)
 end
-function unsafe_evaluate(pea::PolynomialEvaluationArray{T,N}, I::Int) where {T,N}
-    lookuptable = pea.lookuptables[I]
-    coefficients = pea.coefficients[I]
-    evaluate_lookuptable(lookuptable, pea.values, coefficients)
+function unsafe_evaluate(PEA::PolynomialEvaluationArray{T,N}, I::Int) where {T,N}
+    lookuptable = PEA.lookuptables[I]
+    coefficients = PEA.coefficients[I]
+    evaluate_lookuptable(lookuptable, PEA.values, coefficients)
 end
