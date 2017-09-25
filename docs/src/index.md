@@ -36,3 +36,11 @@ f(x) # alternatively evaluate(f, x)
 !!! note
     `f` has then the variable ordering as implied by `DynamicPolynomials.variables(x^2+y^3*z-2x*y)`, i.e.
     `f([1.0, 2.0, 3.0])` will evaluate `f` with `x=1`, `y=2` and `z=3`.
+
+
+## Safety notes
+
+!!! warning
+    For the evaluation multivariate variant of [Horner's method](https://en.wikipedia.org/wiki/Horner%27s_method)
+    is used. Due to that for polynomials with terms of degree over 43 we cannot guarantee
+    an error of less than 1 [ULP](https://en.wikipedia.org/wiki/Unit_in_the_last_place).

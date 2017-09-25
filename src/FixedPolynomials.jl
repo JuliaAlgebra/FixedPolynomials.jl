@@ -8,7 +8,10 @@ module FixedPolynomials
     abstract type AbstractPolySystem{T} end
     export AbstractPolySystem
 
+    include("precomputation.jl")
     include("poly.jl")
     include("show.jl")
     include("convert_promote.jl")
+    include("polynomialarray.jl")
+
 end

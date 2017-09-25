@@ -76,12 +76,16 @@
     @test weylnorm([f, f]) == √weyldot([f, f], [f, f])
 
 
-    # Due to bug during evaluation of "empty" polynomials
+
     Impl.@polyvar x y z
+
+    @test evaluate(Polynomial{Float64}(x^3+x), [2.0]) ≈ 2.0^3 + 2.0
+
     f = x + y + 2z
     g = x + z
     h = y + z
 
+    # Due to bug during evaluation of "empty" polynomials
     F = convert(Vector{Polynomial{Float64}}, [f, g, h])
 
     J = [differentiate(f, i) for f in F, i=1:nvariables.(F[1])]
