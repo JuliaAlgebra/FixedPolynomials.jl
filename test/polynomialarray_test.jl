@@ -16,14 +16,14 @@
     @test u[1, 2] ≈ evaluate(g, w)
 
     w = rand(Complex128, 2)
-    fillvalues!(F, w)
+    precompute!(F, w)
     @test unsafe_evaluate(F, 2, 2) ≈ evaluate(f, w)
     @test unsafe_evaluate(F, 1, 2) ≈ evaluate(g, w)
     @test unsafe_evaluate(F, 3) ≈ evaluate(g, w)
 
     G = PolynomialEvaluationArray([f g])
     w = rand(Complex128, 2)
-    fillvalues!(G, w)
+    precompute!(G, w)
     @test unsafe_evaluate(G, 1) ≈ evaluate(f, w)
     @test unsafe_evaluate(G, 2) ≈ evaluate(g, w)
 end
