@@ -4,8 +4,8 @@
 For all exponent matrixes `exponents` find for each variable, i.e. each row, all occuring (unique)
 exponents and sort them in ascending order.
 Let ``k_i`` be the number of occuring exponents for variable ``i``. Then this returns a
-`Matrix` with ``\max_i(k_i)`` columns and number of variables columns.
-Each row is filled with the unique occuring exponents ``e_1,…,e_{k_i}`` if ``k_i < \max_i(k_i)``
+`Matrix` with ``\\max_i(k_i)`` columns and number of variables columns.
+Each row is filled with the unique occuring exponents ``e_1,…,e_{k_i}`` if ``k_i < \\max_i(k_i)``
 the rest is filled with zeros.
 """
 function unique_exponents(exponents::Vector{Matrix{Int}})
