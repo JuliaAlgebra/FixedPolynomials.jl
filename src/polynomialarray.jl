@@ -66,13 +66,24 @@ unsafe_evaluate(F, 1, 2) == evaluate(f2, x)
 unsafe_evaluate(F, 2, 2) == evaluate(f4, x)
 ```
 """
+# It seems that the Vararg variant allocates, therefore we handroll for dimensions 1 to 3
+function unsafe_evaluate(PEA::PolynomialEvaluationArray{T,1}, I::Int) where T
+    lookuptable = PEA.lookuptables[I]
+    coefficients = PEA.coefficients[I]
+    evaluate_lookuptable(lookuptable, PEA.values, coefficients)
+end
+function unsafe_evaluate(PEA::PolynomialEvaluationArray{T,2}, i::Int, j::Int) where T
+    lookuptable = PEA.lookuptables[i, j]
+    coefficients = PEA.coefficients[i, j]
+    evaluate_lookuptable(lookuptable, PEA.values, coefficients)
+end
+function unsafe_evaluate(PEA::PolynomialEvaluationArray{T,3}, i::Int, j::Int, k::Int) where T
+    lookuptable = PEA.lookuptables[i, j, k]
+    coefficients = PEA.coefficients[i, j, k]
+    evaluate_lookuptable(lookuptable, PEA.values, coefficients)
+end
 function unsafe_evaluate(PEA::PolynomialEvaluationArray{T,N}, I::Vararg{Int,N}) where {T,N}
     lookuptable = PEA.lookuptables[I...]
     coefficients = PEA.coefficients[I...]
-    evaluate_lookuptable(lookuptable, PEA.values, coefficients)
-end
-function unsafe_evaluate(PEA::PolynomialEvaluationArray{T,N}, I::Int) where {T,N}
-    lookuptable = PEA.lookuptables[I]
-    coefficients = PEA.coefficients[I]
     evaluate_lookuptable(lookuptable, PEA.values, coefficients)
 end
