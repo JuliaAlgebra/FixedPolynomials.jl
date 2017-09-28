@@ -67,7 +67,7 @@ unsafe_evaluate(F, 2, 2) == evaluate(f4, x)
 ```
 """
 # It seems that the Vararg variant allocates, therefore we handroll for dimensions 1 to 3
-function unsafe_evaluate(PEA::PolynomialEvaluationArray{T,1}, I::Int) where T
+function unsafe_evaluate(PEA::PolynomialEvaluationArray{T,N}, I::Int) where {T,N}
     lookuptable = PEA.lookuptables[I]
     coefficients = PEA.coefficients[I]
     evaluate_lookuptable(lookuptable, PEA.values, coefficients)
