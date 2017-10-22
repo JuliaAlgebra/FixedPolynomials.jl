@@ -71,7 +71,32 @@ function differences!(unique_exponents::Matrix{Int})
 end
 
 @inline pow(x::AbstractFloat, k::Integer) = k == 1 ? x : Base.FastMath.pow_fast(x, k)
-@inline pow(x::Complex, k::Integer) = k == 1 ? x : x^k
+#@inline pow(x::Complex, k::Integer) = k == 1 ? x : x^k
+# simplified from Base.power_by_squaring
+@inline function pow(x::Complex, p::Integer)
+    if p == 1
+        return copy(x)
+    elseif p == 0
+        return one(x)
+    elseif p == 2
+        return x*x
+    end
+    t = trailing_zeros(p) + 1
+    p >>= t
+    while (t -= 1) > 0
+        x *= x
+    end
+    y = x
+    while p > 0
+        t = trailing_zeros(p) + 1
+        p >>= t
+        while (t -= 1) >= 0
+            x *= x
+        end
+        y *= x
+    end
+    return y
+end
 
 """
     fillvalues!(values::Matrix{T}, diffs::Matrix{Int}, x::AbstractVector{T}) where T
