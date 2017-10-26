@@ -17,10 +17,12 @@
     @test [p(w) for p in ∇f] ≈ u
 
     cfg = GradientConfig(f, Complex128)
-    @test f(w) ≈ evaluate(f, w, cfg)
-    @test [p(w) for p in ∇f] ≈ gradient(f, w, cfg)
-    @test [p(w) for p in ∇f] ≈ gradient!(u, f, w, cfg)
-    @test [p(w) for p in ∇f] ≈ u
+    wc = rand(Complex128, 3)
+    uc = zeros(Complex128, 3)
+    @test f(wc) ≈ evaluate(f, wc, cfg)
+    @test [p(wc) for p in ∇f] ≈ gradient(f, wc, cfg)
+    @test [p(wc) for p in ∇f] ≈ gradient!(uc, f, wc, cfg)
+    @test [p(wc) for p in ∇f] ≈ uc
 
     cfg = GradientConfig(f)
     @test f(w) ≈ evaluate(f, w, cfg)
