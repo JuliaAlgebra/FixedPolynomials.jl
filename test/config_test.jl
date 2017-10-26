@@ -1,7 +1,7 @@
 @testset "Config" begin
     Impl.@polyvar x y z
 
-    f = Polynomial{Float64}(x^2+3y+z*x+y^2+12*x)
+    f = Polynomial{Float64}(x^2+3y+z*x+y^2+12*x^7*z^5)
     g = Polynomial{Float64}(4*y*x^2-3z+z*x^4+y+y^2-y*x)
 
     ∇f = [differentiate(f, i) for i=1:3]
