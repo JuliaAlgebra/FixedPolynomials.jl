@@ -271,10 +271,13 @@ function Base.deepcopy(cfg::GradientConfig)
 end
 
 """
-    evaluate(g, x, cfg::GradientConfig)
+    evaluate(g, x, cfg::GradientConfig [, precomputed=false])
 
 Evaluate `g` at `x` using the precomputated values in `cfg`.
 Note that this is usually signifcant faster than `evaluate(g, x)`.
+With `precomputed=true` we rely on the previous intermediate results in `cfg`. Therefore
+the result is only correct if you previouls called `evaluate`, or `gradient` with the same
+`x`.
 
 ### Example
 ```julia
@@ -282,14 +285,16 @@ cfg = GradientConfig(g)
 evaluate(g, x, cfg)
 ```
 """
-function evaluate(g::Polynomial, x::AbstractVector, cfg::GradientConfig{T}) where T
-    fillvalues!(cfg.differences_values, x, cfg.differences)
-    fillreduced_values!(cfg.poly, g, x, cfg.differences_values)
+function evaluate(g::Polynomial, x::AbstractVector, cfg::GradientConfig{T}, precomputed=false) where T
+    if !precomputed
+        fillvalues!(cfg.differences_values, x, cfg.differences)
+        fillreduced_values!(cfg.poly, g, x, cfg.differences_values)
+    end
     _evaluate(x, cfg.poly)
 end
 
 """
-    gradient(g, x, cfg::GradientConfig)
+    gradient(g, x, cfg::GradientConfig[, precomputed=false])
 
 Compute the gradient of `g` at `x` using the precomputated values in `cfg`.
 
@@ -298,15 +303,19 @@ Compute the gradient of `g` at `x` using the precomputated values in `cfg`.
 cfg = GradientConfig(g)
 gradient(g, x, cfg)
 ```
+
+With `precomputed=true` we rely on the previous intermediate results in `cfg`. Therefore
+the result is only correct if you previouls called `evaluate`, or `gradient` with the same
+`x`.
 """
-function gradient(g::Polynomial, x::AbstractVector, cfg::GradientConfig{T}) where T
+function gradient(g::Polynomial, x::AbstractVector, cfg::GradientConfig{T}, precomputed=false) where T
     u = zeros(T, nvariables(g))
-    gradient!(u, g, x, cfg)
+    gradient!(u, g, x, cfg, precomputed)
     u
 end
 
 """
-    gradient!(u, g, x, cfg::GradientConfig)
+    gradient!(u, g, x, cfg::GradientConfig [, precomputed=false])
 
 Compute the gradient of `g` at `x` using the precomputated values in `cfg`
 and store thre result in u.
@@ -316,10 +325,16 @@ and store thre result in u.
 cfg = GradientConfig(g)
 gradient(u, g, x, cfg)
 ```
+
+With `precomputed=true` we rely on the previous intermediate results in `cfg`. Therefore
+the result is only correct if you previouls called `evaluate`, or `gradient` with the same
+`x`.
 """
-function gradient!(u::AbstractVector, g::Polynomial, x::AbstractVector, cfg::GradientConfig{T}) where T
-    fillvalues!(cfg.differences_values, x, cfg.differences)
-    fillreduced_values!(cfg.poly, g, x, cfg.differences_values)
+function gradient!(u::AbstractVector, g::Polynomial, x::AbstractVector, cfg::GradientConfig{T}, precomputed=false) where T
+    if !precomputed
+        fillvalues!(cfg.differences_values, x, cfg.differences)
+        fillreduced_values!(cfg.poly, g, x, cfg.differences_values)
+    end
     _gradient!(u, x, cfg.poly)
 end
 
@@ -447,7 +462,7 @@ function Base.deepcopy(cfg::JacobianConfig)
 end
 
 """
-    evaluate(F, x, cfg::JacobianConfig)
+    evaluate(F, x, cfg::JacobianConfig [, precomputed=false])
 
 Evaluate the system `F` at `x` using the precomputated values in `cfg`.
 Note that this is usually signifcant faster than `map(f -> evaluate(f, x), F)`.
@@ -457,13 +472,17 @@ Note that this is usually signifcant faster than `map(f -> evaluate(f, x), F)`.
 cfg = JacobianConfig(F)
 evaluate(F, x, cfg)
 ```
+
+With `precomputed=true` we rely on the previous intermediate results in `cfg`. Therefore
+the result is only correct if you previouls called `evaluate`, or `jacobian` with the same
+`x`.
 """
-function evaluate(G::Vector{<:Polynomial}, x::AbstractVector, cfg::JacobianConfig{T}) where T
-    evaluate!(zeros(T, length(G)), G, x, cfg)
+function evaluate(G::Vector{<:Polynomial}, x::AbstractVector, cfg::JacobianConfig{T}, precomputed=false) where T
+    evaluate!(zeros(T, length(G)), G, x, cfg, precomputed)
 end
 
 """
-    evaluate!(u, F, x, cfg::JacobianConfig)
+    evaluate!(u, F, x, cfg::JacobianConfig [, precomputed=false])
 
 Evaluate the system `F` at `x` using the precomputated values in `cfg`
 and store the result in `u`.
@@ -474,18 +493,28 @@ Note that this is usually signifcant faster than `map!(u, f -> evaluate(f, x), F
 cfg = JacobianConfig(F)
 evaluate!(u, F, x, cfg)
 ```
+
+With `precomputed=true` we rely on the previous intermediate results in `cfg`. Therefore
+the result is only correct if you previouls called `evaluate`, or `jacobian` with the same
+`x`.
 """
-function evaluate!(u::AbstractVector, G::Vector{<:Polynomial}, x::AbstractVector, cfg::JacobianConfig{T}) where T
-    fillvalues!(cfg.differences_values, x, cfg.differences)
-    for i=1:length(cfg.polys)
-        fillreduced_values!(cfg.polys[i], G[i], x, cfg.differences_values)
-        u[i] = _evaluate(x, cfg.polys[i])
+function evaluate!(u::AbstractVector, G::Vector{<:Polynomial}, x::AbstractVector, cfg::JacobianConfig{T}, precomputed=false) where T
+    if !precomputed
+        fillvalues!(cfg.differences_values, x, cfg.differences)
+        for i=1:length(cfg.polys)
+            fillreduced_values!(cfg.polys[i], G[i], x, cfg.differences_values)
+            u[i] = _evaluate(x, cfg.polys[i])
+        end
+    else
+        for i=1:length(cfg.polys)
+            u[i] = _evaluate(x, cfg.polys[i])
+        end
     end
     u
 end
 
 """
-    jacobian!(u, F, x, cfg::JacobianConfig)
+    jacobian!(u, F, x, cfg::JacobianConfig [, precomputed=false])
 
 Evaluate the jacobian of `F` at `x` using the precomputated values in `cfg`.
 
@@ -494,15 +523,19 @@ Evaluate the jacobian of `F` at `x` using the precomputated values in `cfg`.
 cfg = JacobianConfig(F)
 jacobian(F, x, cfg)
 ```
+
+With `precomputed=true` we rely on the previous intermediate results in `cfg`. Therefore
+the result is only correct if you previouls called `evaluate`, or `jacobian` with the same
+`x`.
 """
-function jacobian(g::Vector{<:Polynomial}, x::AbstractVector, cfg::JacobianConfig{T}) where T
+function jacobian(g::Vector{<:Polynomial}, x::AbstractVector, cfg::JacobianConfig{T}, precomputed=false) where T
     u = zeros(T, length(g), length(x))
-    jacobian!(u, g, x, cfg)
+    jacobian!(u, g, x, cfg, precomputed)
     u
 end
 
 """
-    jacobian!(u, F, x, cfg::JacobianConfig)
+    jacobian!(u, F, x, cfg::JacobianConfig [, precomputed=false])
 
 Evaluate the jacobian of `F` at `x` using the precomputated values in `cfg`
 and store the result in `u`.
@@ -512,12 +545,22 @@ and store the result in `u`.
 cfg = JacobianConfig(F)
 jacobian!(u, F, x, cfg)
 ```
+
+With `precomputed=true` we rely on the previous intermediate results in `cfg`. Therefore
+the result is only correct if you previouls called `evaluate`, or `jacobian` with the same
+`x`.
 """
-function jacobian!(u::AbstractMatrix, G::Vector{<:Polynomial}, x::AbstractVector, cfg::JacobianConfig{T}) where T
-    fillvalues!(cfg.differences_values, x, cfg.differences)
-    for i=1:length(G)
-        fillreduced_values!(cfg.polys[i], G[i], x, cfg.differences_values)
-        gradient_row!(u, x, cfg.polys[i], i)
+function jacobian!(u::AbstractMatrix, G::Vector{<:Polynomial}, x::AbstractVector, cfg::JacobianConfig{T}, precomputed=false) where T
+    if !precomputed
+        fillvalues!(cfg.differences_values, x, cfg.differences)
+        for i=1:length(G)
+            fillreduced_values!(cfg.polys[i], G[i], x, cfg.differences_values)
+            gradient_row!(u, x, cfg.polys[i], i)
+        end
+    else
+        for i=1:length(G)
+            gradient_row!(u, x, cfg.polys[i], i)
+        end
     end
     u
 end
