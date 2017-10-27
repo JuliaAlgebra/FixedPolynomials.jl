@@ -7,7 +7,7 @@
 
 [FixedPolynomials.jl](https://github.com/saschatimme/FixedPolynomials.jl) is a library for
 *really fast* evaluation of multivariate polynomials.
-The latest benchmark results can be found [here](https://github.com/saschatimme/FixedPolynomials.jl/pull/3).
+[Here](https://github.com/saschatimme/FixedPolynomials.jl/pull/3) are the latest benchmark results.
 
 Since `FixedPolynomials` polynomials are optimised for fast evaluation they are not suited
 for construction of polynomials.
@@ -17,12 +17,6 @@ It is recommended to construct a polynomial with an implementation of
 convert it then into a `FixedPolynomials.Polynomial` for further computations.
 
 ## Getting started
-
-Install the this package via
-```julia
-Pkg.add("FixedPolynomials")
-```
-
 Here is an example on how to create a `Polynomial` with `Float64` coefficients:
 ```julia
 using FixedPolynomials
@@ -36,6 +30,24 @@ To evaluate `f` you simply have to pass in a `Vector{Float64}`
 ```julia
 x = rand(3)
 f(x) # alternatively evaluate(f, x)
+```
+
+But this is note the fastest way possible. In order to achieve the best performance we need to precompute some things and also preallocate
+intermediate storage. For this we have [`GradientConfig`](@ref) and [`JacobianConfig`](@ref).
+For single polynomial the API is as follows
+```julia
+cfg = GradientConfig(f) # this can be reused!
+f(x) == evaluate(f, x, cfg)
+# We can also compute the gradient of f at x
+map(g -> g(x), ∇f) == gradient(f, x, cfg)
+```
+
+We also have support for systems of polynomials:
+```julia
+cfg = JacobianConfig([f, f]) # this can be reused!
+[f(x), f(x)] == evaluate([f, f] x, cfg)
+# We can also compute the jacobian of [f, f] at x
+jacobian(f, x, cfg)
 ```
 
 [docs-stable-img]: https://img.shields.io/badge/docs-stable-blue.svg
