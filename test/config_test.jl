@@ -12,22 +12,22 @@
 
     cfg = GradientConfig(f, w)
     @test f(w) ≈ evaluate(f, w, cfg)
-    @test [p(w) for p in ∇f] ≈ gradient(f, w, cfg)
-    @test [p(w) for p in ∇f] ≈ gradient!(u, f, w, cfg)
+    @test [p(w) for p in ∇f] ≈ FixedPolynomials.gradient(f, w, cfg)
+    @test [p(w) for p in ∇f] ≈ FixedPolynomials.gradient!(u, f, w, cfg)
     @test [p(w) for p in ∇f] ≈ u
 
     cfg = GradientConfig(f, Complex128)
     wc = rand(Complex128, 3)
     uc = zeros(Complex128, 3)
     @test f(wc) ≈ evaluate(f, wc, cfg)
-    @test [p(wc) for p in ∇f] ≈ gradient(f, wc, cfg)
-    @test [p(wc) for p in ∇f] ≈ gradient!(uc, f, wc, cfg)
+    @test [p(wc) for p in ∇f] ≈ FixedPolynomials.gradient(f, wc, cfg)
+    @test [p(wc) for p in ∇f] ≈ FixedPolynomials.gradient!(uc, f, wc, cfg)
     @test [p(wc) for p in ∇f] ≈ uc
 
     cfg = GradientConfig(f)
     @test f(w) ≈ evaluate(f, w, cfg)
-    @test [p(w) for p in ∇f] ≈ gradient(f, w, cfg)
-    @test [p(w) for p in ∇f] ≈ gradient!(u, f, w, cfg)
+    @test [p(w) for p in ∇f] ≈ FixedPolynomials.gradient(f, w, cfg)
+    @test [p(w) for p in ∇f] ≈ FixedPolynomials.gradient!(u, f, w, cfg)
     @test [p(w) for p in ∇f] ≈ u
 
     cfg2 = deepcopy(cfg)
@@ -35,15 +35,15 @@
 
     r = GradientDiffResult(cfg)
 
-    gradient!(r, f, w, cfg)
+    FixedPolynomials.gradient!(r, f, w, cfg)
     @test f(w) ≈ value(r)
-    @test [p(w) for p in ∇f] ≈ gradient(r)
+    @test [p(w) for p in ∇f] ≈ FixedPolynomials.gradient(r)
 
     v = zeros(4)
     r = GradientDiffResult((@view v[1:3]))
-    gradient!(r, f, w, cfg)
+    FixedPolynomials.gradient!(r, f, w, cfg)
     @test f(w) ≈ value(r)
-    @test [p(w) for p in ∇f] ≈ gradient(r)
+    @test [p(w) for p in ∇f] ≈ FixedPolynomials.gradient(r)
 
 
     @test_throws MethodError GradientConfig([f, f], w)
