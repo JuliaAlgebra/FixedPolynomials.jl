@@ -534,7 +534,7 @@ This structure also signals `jacobian!` to store ``F(x)`` and ``J_F(x)``.
 ```julia
 cfg = JacobianConfig(F, x)
 r = JacobianDiffResult(cfg)
-gradient!(r, F, x, cfg)
+jacobian!(r, F, x, cfg)
 
 value(r) == map(f -> f(x), F)
 jacobian(r) == jacobian(F, x, cfg)
@@ -565,12 +565,12 @@ jacobian(r::JacobianDiffResult) = r.jacobian
     jacobian!(r::JacobianDiffResult, F, x, cfg::JacobianConfig)
 
 Compute ``F(x)`` and the jacobian of `F` at `x` at once using the precomputated values in `cfg`
-and store thre result in `r`. This is faster than calling both values separetely.
+and store thre result in `r`. This is faster than computing both values separetely.
 
 ### Example
 ```julia
 cfg = GradientConfig(g)
-r = GradientDiffResult(r)
+r = GradientDiffResult(cfg)
 gradient!(r, g, x, cfg)
 
 value(r) == g(x)

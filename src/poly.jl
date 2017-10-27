@@ -1,6 +1,6 @@
 export Polynomial, exponents, coefficients, variables, nvariables, nterms,
     ishomogenized, ishomogenous, homogenize, dehomogenize, degree, evaluate, substitute,
-    differentiate, ∇, weylnorm, weyldot
+    differentiate, ∇, weylnorm, weyldot, scale_coefficients!
 
 """
     Polynomial(p::MultivariatePolynomials.AbstractPolynomial [, variables [, homogenized=false]])
@@ -37,7 +37,7 @@ mutable struct Polynomial{T<:Number}
         sorted_cols = sort!([1:size(exponents,2);], lt=((i, j) -> lt_total_degree(exponents[:,i], exponents[:,j])), rev=true)
         exps = exponents[:, sorted_cols]
         coeffs = coefficients[sorted_cols]
-        new(exps, coeffs, variables, homogenized)
+        new(exps, coeffs, copy(variables), homogenized)
     end
 end
 
@@ -148,7 +148,13 @@ degree(p::Polynomial) = sum(exponents(p)[:,1])
 
 ==(p::Polynomial, q::Polynomial) = exponents(p) == exponents(q) && coefficients(p) == coefficients(q)
 Base.isequal(p::Polynomial, q::Polynomial) = exponents(p) == exponents(q) && coefficients(p) == coefficients(q)
-
+function Base.deepcopy(f::Polynomial{T}) where T
+    Polynomial{T}(
+        f.exponents,
+        f.coefficients,
+        f.variables,
+        f.homogenized)
+end
 
 # ITERATOR
 Base.start(p::Polynomial) = (1, nterms(p))
@@ -405,8 +411,12 @@ function weyldot(f::Polynomial,g::Polynomial)
     result
 end
 
-function weyldot(f::Vector{Polynomial{T}}, g::Vector{Polynomial{S}}) where {T,S}
-    sum(map(weyldot, f, g))
+function weyldot(F::Vector{Polynomial{T}}, G::Vector{Polynomial{S}}) where {T,S}
+    res = zero(promote_type(S, T))
+    for (f, g) in zip(F, G)
+        res += weyldot(f, g)
+    end
+    res
 end
 
 """
@@ -417,3 +427,13 @@ Note that this is only properly defined if `f` is homogenous.
 """
 weylnorm(f::Polynomial) = √weyldot(f,f)
 weylnorm(f::Vector{Polynomial{T}}) where T = √weyldot(f,f)
+
+
+"""
+    scale_coefficients!(f::Polynomial, λ)
+
+Scale the coefficients of `f` with the factor `λ`.
+"""
+function scale_coefficients!(f::Polynomial, λ)
+    f.coefficients .*= λ
+end

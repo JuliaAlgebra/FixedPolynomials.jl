@@ -24,6 +24,7 @@ differentiate
 ∇
 homogenize
 dehomogenize
+scale_coefficients!
 ```
 
 ## Misc
