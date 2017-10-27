@@ -161,11 +161,19 @@ var documenterSearchIndex = {"docs": [
 },
 
 {
+    "location": "reference.html#FixedPolynomials.scale_coefficients!",
+    "page": "Polynomial",
+    "title": "FixedPolynomials.scale_coefficients!",
+    "category": "Function",
+    "text": "scale_coefficients!(f::Polynomial, λ)\n\nScale the coefficients of f with the factor λ.\n\n\n\n"
+},
+
+{
     "location": "reference.html#Modification-1",
     "page": "Polynomial",
     "title": "Modification",
     "category": "section",
-    "text": "differentiate\n∇\nhomogenize\ndehomogenize"
+    "text": "differentiate\n∇\nhomogenize\ndehomogenize\nscale_coefficients!"
 },
 
 {
@@ -269,7 +277,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Fast Evaluation",
     "title": "FixedPolynomials.jacobian!",
     "category": "Function",
-    "text": "jacobian!(u, F, x, cfg::JacobianConfig)\n\nEvaluate the jacobian of F at x using the precomputated values in cfg and store the result in u.\n\nExample\n\ncfg = JacobianConfig(F)\njacobian!(u, F, x, cfg)\n\n\n\njacobian!(r::JacobianDiffResult, F, x, cfg::JacobianConfig)\n\nCompute F(x) and the jacobian of F at x at once using the precomputated values in cfg and store thre result in r. This is faster than calling both values separetely.\n\nExample\n\ncfg = GradientConfig(g)\nr = GradientDiffResult(r)\ngradient!(r, g, x, cfg)\n\nvalue(r) == g(x)\ngradient(r) == gradient(g, x, cfg)\n\n\n\n"
+    "text": "jacobian!(u, F, x, cfg::JacobianConfig)\n\nEvaluate the jacobian of F at x using the precomputated values in cfg and store the result in u.\n\nExample\n\ncfg = JacobianConfig(F)\njacobian!(u, F, x, cfg)\n\n\n\njacobian!(r::JacobianDiffResult, F, x, cfg::JacobianConfig)\n\nCompute F(x) and the jacobian of F at x at once using the precomputated values in cfg and store thre result in r. This is faster than computing both values separetely.\n\nExample\n\ncfg = GradientConfig(g)\nr = GradientDiffResult(cfg)\ngradient!(r, g, x, cfg)\n\nvalue(r) == g(x)\ngradient(r) == gradient(g, x, cfg)\n\n\n\n"
 },
 
 {
@@ -293,7 +301,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Fast Evaluation",
     "title": "FixedPolynomials.JacobianDiffResult",
     "category": "Type",
-    "text": "JacobianDiffResult(cfg::GradientConfig)\n\nDuring the computation of the jacobian J_F(x) we compute nearly everything we need for the evaluation of F(x). JacobianDiffResult allocates memory to hold both values. This structure also signals jacobian! to store F(x) and J_F(x).\n\nExample\n\ncfg = JacobianConfig(F, x)\nr = JacobianDiffResult(cfg)\ngradient!(r, F, x, cfg)\n\nvalue(r) == map(f -> f(x), F)\njacobian(r) == jacobian(F, x, cfg)\n\nJacobianDiffResult(value::AbstractVector, jacobian::AbstractMatrix)\n\nAllocate the memory to hold the value and the jacobian by yourself.\n\n\n\n"
+    "text": "JacobianDiffResult(cfg::GradientConfig)\n\nDuring the computation of the jacobian J_F(x) we compute nearly everything we need for the evaluation of F(x). JacobianDiffResult allocates memory to hold both values. This structure also signals jacobian! to store F(x) and J_F(x).\n\nExample\n\ncfg = JacobianConfig(F, x)\nr = JacobianDiffResult(cfg)\njacobian!(r, F, x, cfg)\n\nvalue(r) == map(f -> f(x), F)\njacobian(r) == jacobian(F, x, cfg)\n\nJacobianDiffResult(value::AbstractVector, jacobian::AbstractMatrix)\n\nAllocate the memory to hold the value and the jacobian by yourself.\n\n\n\n"
 },
 
 {
