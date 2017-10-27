@@ -27,36 +27,17 @@ You can also create a polynomial directly. Note that in exponents each column re
 Poly([3 1; 1 1; 0 2 ], [-2.0, 3.0], [:x, :y, :z]) == 3.0x^2yz^2 - 2x^3y
 ```
 """
-struct Polynomial{T<:Number}
+mutable struct Polynomial{T<:Number}
     exponents::Matrix{Int}
     coefficients::Vector{T}
     variables::Vector{Symbol}
     homogenized::Bool
 
-    # this are only internal data structures to avoid allocations
-    # Let M the exponents matrix. Then we can associate a matrix M' in which each
-    # row of m was sorted separetly in ascending order.
-    # `_phi` is the  map from M' to M s.t. M[i,j] == M'[i, _phi[i,j]]
-    # For each row of M' we can only store the difference to the previous value.
-    # This is `_sorteddiff`.
-    # To evaluate a polynomial we then use '_phi' and '_sorteddiff' to compute the matrix
-    # `x.^M` and store the result in `_values`.
-    _lookuptable::Matrix{Int}
-    _differences::Matrix{Int}
-    _values::Matrix{T}
-
     function Polynomial{T}(exponents::Matrix{Int}, coefficients::Vector{T}, variables::Vector{Symbol}, homogenized::Bool) where {T<:Number}
         sorted_cols = sort!([1:size(exponents,2);], lt=((i, j) -> lt_total_degree(exponents[:,i], exponents[:,j])), rev=true)
-
         exps = exponents[:, sorted_cols]
         coeffs = coefficients[sorted_cols]
-
-        ue = unique_exponents(exps)
-        _lookuptable = lookuptable(exps, ue)
-        _differences = differences!(ue)
-        _values = similar(_differences, T)
-
-        new(exps, coeffs, variables, homogenized, _lookuptable, _differences, _values)
+        new(exps, coeffs, variables, homogenized)
     end
 end
 
@@ -182,15 +163,54 @@ Base.done(p::Polynomial, state) = state[1] > state[2]
 Base.length(p::Polynomial) = nterms(p)
 Base.eltype(p::Polynomial{T}) where {T} = T
 
+@inline pow(x::AbstractFloat, k::Integer) = Base.FastMath.pow_fast(x, k)
+#@inline pow(x::Complex, k::Integer) = k == 1 ? x : x^k
+# simplified from Base.power_by_squaring
+@inline function pow(x::Number, p::Integer)
+    if p == 1
+        return copy(x)
+    elseif p == 0
+        return one(x)
+    elseif p == 2
+        return x*x
+    end
+    t = trailing_zeros(p) + 1
+    p >>= t
+    while (t -= 1) > 0
+        x *= x
+    end
+    y = x
+    while p > 0
+        t = trailing_zeros(p) + 1
+        p >>= t
+        while (t -= 1) >= 0
+            x *= x
+        end
+        y *= x
+    end
+    return y
+end
+
 """
     evaluate(p::Polynomial{T}, x::AbstractVector{T})
 
 Evaluates `p` at `x`, i.e. ``p(x)``.
 `Polynomial` is also callable, i.e. you can also evaluate it via `p(x)`.
 """
-function evaluate(p::Polynomial{T}, x::AbstractVector{T}) where {T<:Number}
-    fillvalues!(p._values, p._differences, x)
-    evaluate_lookuptable(p._lookuptable, p._values, p.coefficients)
+function evaluate(p::Polynomial{S}, x::AbstractVector{T}) where {S<:Number, T<:Number}
+    cfs = coefficients(p)
+    exps = exponents(p)
+    nvars, nterms = size(exps)
+    res = zero(promote_type(S,T))
+    for j = 1:nterms
+        term = p.coefficients[j]
+        for i = 1:nvars
+            k = exps[i, j]
+            term *= pow(x[i], k)
+        end
+        res += term
+    end
+    res
 end
 
 (p::Polynomial)(x) = evaluate(p, x)
