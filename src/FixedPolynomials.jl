@@ -8,7 +8,7 @@ module FixedPolynomials
     abstract type AbstractPolySystem{T} end
     export AbstractPolySystem
 
-    import Base: gradient
+    #import Base: gradient
 
     include("poly.jl")
     include("show.jl")

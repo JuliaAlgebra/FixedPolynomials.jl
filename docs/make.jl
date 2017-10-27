@@ -6,7 +6,7 @@ makedocs(
     pages = [
         "Introduction" => "index.md",
         "Polynomial" => "reference.md",
-        "PolynomialEvaluationArray" => "polynomialevaluationarray.md"
+        "Fast Evaluation" => "performance.md"
         ]
 )
 

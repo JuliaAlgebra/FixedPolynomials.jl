@@ -17,14 +17,6 @@ ishomogenous
 ishomogenized
 ```
 
-## Evaluation
-
-```@docs
-evaluate
-weyldot
-weylnorm
-```
-
 ## Modification
 
 ```@docs
@@ -32,4 +24,11 @@ differentiate
 ∇
 homogenize
 dehomogenize
+```
+
+## Misc
+
+```@docs
+weyldot
+weylnorm
 ```

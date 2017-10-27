@@ -13,7 +13,7 @@ convert it then into a `FixedPolynomials.Polynomial` for further computations.
 
 ## Tutorial
 Here is an example on how to create a `Polynomial` with `Float64` coefficients:
-```
+```julia
 using FixedPolynomials
 import DynamicPolynomials: @polyvar
 
@@ -22,15 +22,30 @@ import DynamicPolynomials: @polyvar
 f = Polynomial{Float64}(x^2+y^3*z-2x*y)
 ```
 To evaluate `f` you simply have to pass in a `Vector{Float64}`
-```
+```julia
 x = rand(3)
 f(x) # alternatively evaluate(f, x)
 ```
-!!! note
 
-    The only defined method is `evaluate(f::Polynomial{T}, x::AbstractVector{T})`.
-    This is intentional restrictive to avoid any unintended performance penalties.
+But this is note the fastest way possible. In order to achieve the best performance we need to precompute some things and also preallocate
+intermediate storage. For this we have [`GradientConfig`](@ref) and [`JacobianConfig`](@ref).
+For single polynomial the API is as follows
+```julia
+cfg = GradientConfig(f) # this can be reused!
+f(x) == evaluate(f, x, cfg)
+# We can also compute the gradient of f at x
+map(g -> g(x), ∇f) == gradient(f, x, cfg)
+```
 
+We also have support for systems of polynomials:
+```julia
+cfg = JacobianConfig([f, f]) # this can be reused!
+[f(x), f(x)] == evaluate([f, f] x, cfg)
+# We can also compute the jacobian of [f, f] at x
+jacobian(f, x, cfg)
+```
+
+Make sure to also check out [`GradientDiffResult`](@ref) and [`JacobianDiffResult`](@ref).
 
 
 !!! note
