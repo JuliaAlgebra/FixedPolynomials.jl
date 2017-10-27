@@ -32,7 +32,7 @@ x = rand(3)
 f(x) # alternatively evaluate(f, x)
 ```
 
-But this is note the fastest way possible. In order to achieve the best performance we need to precompute some things and also preallocate
+But this is not the fastest way possible. In order to achieve the best performance we need to precompute some things and also preallocate
 intermediate storage. For this we have [`GradientConfig`](@ref) and [`JacobianConfig`](@ref).
 For single polynomial the API is as follows
 ```julia
