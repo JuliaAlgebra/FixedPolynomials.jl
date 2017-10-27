@@ -133,7 +133,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Polynomial",
     "title": "FixedPolynomials.evaluate",
     "category": "Function",
-    "text": "evaluate(p::Polynomial{T}, x::AbstractVector{T})\n\nEvaluates p at x, i.e. p(x). Polynomial is also callable, i.e. you can also evaluate it via p(x).\n\n\n\n"
+    "text": "evaluate(p::Polynomial{T}, x::AbstractVector{T})\n\nEvaluates p at x, i.e. p(x). Polynomial is also callable, i.e. you can also evaluate it via p(x).\n\n\n\nevaluate(g, x, cfg::GradientConfig)\n\nEvaluate g at x using the precomputated values in cfg. Note that this is usually signifcant faster than evaluate(g, x).\n\nExample\n\ncfg = GradientConfig(g)\nevaluate(g, x, cfg)\n\n\n\nevaluate(F, x, cfg::JacobianConfig)\n\nEvaluate the system F at x using the precomputated values in cfg. Note that this is usually signifcant faster than map(f -> evaluate(f, x), F).\n\nExample\n\ncfg = JacobianConfig(F)\nevaluate(F, x, cfg)\n\n\n\n"
 },
 
 {
@@ -198,38 +198,6 @@ var documenterSearchIndex = {"docs": [
     "title": "Modification",
     "category": "section",
     "text": "differentiate\n∇\nhomogenize\ndehomogenize"
-},
-
-{
-    "location": "polynomialevaluationarray.html#FixedPolynomials.PolynomialEvaluationArray",
-    "page": "PolynomialEvaluationArray",
-    "title": "FixedPolynomials.PolynomialEvaluationArray",
-    "category": "Type",
-    "text": "PolynomialEvaluationArray(polynomials::Array{Polynomial{T}, N})\n\nA structure for the fast evaluation of the given array polynomials of polynomials. This provides a speedup about the separete evaluation of the polynomials since as much computations as possible are shared over all polynomials of the array.\n\n\n\n"
-},
-
-{
-    "location": "polynomialevaluationarray.html#FixedPolynomials.evaluate!",
-    "page": "PolynomialEvaluationArray",
-    "title": "FixedPolynomials.evaluate!",
-    "category": "Function",
-    "text": "evaluate!(u::AbstractArray{T,N}, PEA::PolynomialEvaluationArray{T,N}, x::AbstractVector{T})\n\nEvaluate PEA at x and store the result in u. This will result in a call to precompute!.\n\n\n\n"
-},
-
-{
-    "location": "polynomialevaluationarray.html#FixedPolynomials.precompute!",
-    "page": "PolynomialEvaluationArray",
-    "title": "FixedPolynomials.precompute!",
-    "category": "Function",
-    "text": "precompute!(PEA::PolynomialEvaluationArray{T}, x::AbstractVector{T})\n\nPrecompute values for the evaluation of PEA at x.\n\n\n\n"
-},
-
-{
-    "location": "polynomialevaluationarray.html#FixedPolynomials.unsafe_evaluate",
-    "page": "PolynomialEvaluationArray",
-    "title": "FixedPolynomials.unsafe_evaluate",
-    "category": "Function",
-    "text": "unsafe_evaluate(PEA::PolynomialEvaluationArray{T,N}, I::Vararg{Int,N})\n\nEvaluate the polynomial with index I in PEA for the value x for which the last call to precompute! occured.\n\nExample\n\nF = PolynomialEvaluationArray([f1 f2; f3 f4])\n# assume now we are only interested on the entries f2 and f4\nprecompute!(F, x) #this is important!\nunsafe_evaluate(F, 1, 2) == evaluate(f2, x)\nunsafe_evaluate(F, 2, 2) == evaluate(f4, x)\n\n\n\n"
 },
 
 {
