@@ -30,6 +30,19 @@
     @test [p(w) for p in ∇f] ≈ FixedPolynomials.gradient!(u, f, w, cfg)
     @test [p(w) for p in ∇f] ≈ u
 
+    cfg = GradientConfig(f)
+    @test f(w) ≈ evaluate(f, w, cfg)
+    @test [p(w) for p in ∇f] ≈ FixedPolynomials.gradient(f, w, cfg, true)
+
+    cfg = GradientConfig(f)
+    @test [p(w) for p in ∇f] ≈ FixedPolynomials.gradient(f, w, cfg)
+    @test f(w) ≈ evaluate(f, w, cfg, true)
+
+    cfg = GradientConfig(f)
+    u = zeros(3)
+    @test f(w) ≈ evaluate(f, w, cfg)
+    @test [p(w) for p in ∇f] ≈ FixedPolynomials.gradient!(u, f, w, cfg, true)
+
     cfg2 = deepcopy(cfg)
     @test cfg2 !== cfg
 
@@ -55,13 +68,21 @@
     @test [f(w), g(w)] ≈ evaluate!(u, [f, g], w, cfg)
     @test [f(w), g(w)] ≈ u
 
+    u = zeros(2)
+    cfg = JacobianConfig([f, g], w)
+    jacobian([f, g], w, cfg)
+    @test [f(w), g(w)] ≈ evaluate([f, g], w, cfg, true)
+    @test [f(w), g(w)] ≈ evaluate!(u, [f, g], w, cfg, true)
+    @test [f(w), g(w)] ≈ u
+
     cfg2 = deepcopy(cfg)
     @test cfg2 !== cfg
 
     U = zeros(2, 3)
     DF = vcat(RowVector([p(w) for p in ∇f]), [p(w) for p in ∇g] |> RowVector)
-    @test DF ≈ jacobian([f, g], w, cfg)
-    @test DF ≈ jacobian!(U, [f, g], w, cfg)
+    evaluate([f, g], w, cfg)
+    @test DF ≈ jacobian([f, g], w, cfg, true)
+    @test DF ≈ jacobian!(U, [f, g], w, cfg, true)
     @test DF ≈ U
 
     r = JacobianDiffResult(cfg)
