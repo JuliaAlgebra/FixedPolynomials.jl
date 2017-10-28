@@ -229,7 +229,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Fast Evaluation",
     "title": "FixedPolynomials.evaluate",
     "category": "Function",
-    "text": "evaluate(p::Polynomial{T}, x::AbstractVector{T})\n\nEvaluates p at x, i.e. p(x). Polynomial is also callable, i.e. you can also evaluate it via p(x).\n\n\n\nevaluate(g, x, cfg::GradientConfig)\n\nEvaluate g at x using the precomputated values in cfg. Note that this is usually signifcant faster than evaluate(g, x).\n\nExample\n\ncfg = GradientConfig(g)\nevaluate(g, x, cfg)\n\n\n\nevaluate(F, x, cfg::JacobianConfig)\n\nEvaluate the system F at x using the precomputated values in cfg. Note that this is usually signifcant faster than map(f -> evaluate(f, x), F).\n\nExample\n\ncfg = JacobianConfig(F)\nevaluate(F, x, cfg)\n\n\n\n"
+    "text": "evaluate(p::Polynomial{T}, x::AbstractVector{T})\n\nEvaluates p at x, i.e. p(x). Polynomial is also callable, i.e. you can also evaluate it via p(x).\n\n\n\nevaluate(g, x, cfg::GradientConfig [, precomputed=false])\n\nEvaluate g at x using the precomputated values in cfg. Note that this is usually signifcant faster than evaluate(g, x).\n\nExample\n\ncfg = GradientConfig(g)\nevaluate(g, x, cfg)\n\nWith precomputed=true we rely on the previous intermediate results in cfg. Therefore the result is only correct if you previouls called evaluate, or gradient with the same x.\n\n\n\nevaluate(F, x, cfg::JacobianConfig [, precomputed=false])\n\nEvaluate the system F at x using the precomputated values in cfg. Note that this is usually signifcant faster than map(f -> evaluate(f, x), F).\n\nExample\n\ncfg = JacobianConfig(F)\nevaluate(F, x, cfg)\n\nWith precomputed=true we rely on the previous intermediate results in cfg. Therefore the result is only correct if you previouls called evaluate, or jacobian with the same x.\n\n\n\n"
 },
 
 {
@@ -237,7 +237,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Fast Evaluation",
     "title": "FixedPolynomials.evaluate!",
     "category": "Function",
-    "text": "evaluate!(u, F, x, cfg::JacobianConfig)\n\nEvaluate the system F at x using the precomputated values in cfg and store the result in u. Note that this is usually signifcant faster than map!(u, f -> evaluate(f, x), F).\n\nExample\n\ncfg = JacobianConfig(F)\nevaluate!(u, F, x, cfg)\n\n\n\n"
+    "text": "evaluate!(u, F, x, cfg::JacobianConfig [, precomputed=false])\n\nEvaluate the system F at x using the precomputated values in cfg and store the result in u. Note that this is usually signifcant faster than map!(u, f -> evaluate(f, x), F).\n\nExample\n\ncfg = JacobianConfig(F)\nevaluate!(u, F, x, cfg)\n\nWith precomputed=true we rely on the previous intermediate results in cfg. Therefore the result is only correct if you previouls called evaluate, or jacobian with the same x.\n\n\n\n"
 },
 
 {
@@ -253,7 +253,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Fast Evaluation",
     "title": "FixedPolynomials.gradient",
     "category": "Function",
-    "text": "gradient(g, x, cfg::GradientConfig)\n\nCompute the gradient of g at x using the precomputated values in cfg.\n\nExample\n\ncfg = GradientConfig(g)\ngradient(g, x, cfg)\n\n\n\ngradient(r::GradientDiffResult)\n\nGet the currently stored gradient in r.\n\n\n\n"
+    "text": "gradient(g, x, cfg::GradientConfig[, precomputed=false])\n\nCompute the gradient of g at x using the precomputated values in cfg.\n\nExample\n\ncfg = GradientConfig(g)\ngradient(g, x, cfg)\n\nWith precomputed=true we rely on the previous intermediate results in cfg. Therefore the result is only correct if you previouls called evaluate, or gradient with the same x.\n\n\n\ngradient(r::GradientDiffResult)\n\nGet the currently stored gradient in r.\n\n\n\n"
 },
 
 {
@@ -261,7 +261,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Fast Evaluation",
     "title": "FixedPolynomials.gradient!",
     "category": "Function",
-    "text": "gradient!(u, g, x, cfg::GradientConfig)\n\nCompute the gradient of g at x using the precomputated values in cfg and store thre result in u.\n\nExample\n\ncfg = GradientConfig(g)\ngradient(u, g, x, cfg)\n\n\n\ngradient!(r::GradientDiffResult, g, x, cfg::GradientConfig)\n\nCompute g(x) and the gradient of g at x at once using the precomputated values in cfg and store thre result in r. This is faster than calling both values separetely.\n\nExample\n\ncfg = GradientConfig(g)\nr = GradientDiffResult(r)\ngradient!(r, g, x, cfg)\n\nvalue(r) == g(x)\ngradient(r) == gradient(g, x, cfg)\n\n\n\n"
+    "text": "gradient!(u, g, x, cfg::GradientConfig [, precomputed=false])\n\nCompute the gradient of g at x using the precomputated values in cfg and store thre result in u.\n\nExample\n\ncfg = GradientConfig(g)\ngradient(u, g, x, cfg)\n\nWith precomputed=true we rely on the previous intermediate results in cfg. Therefore the result is only correct if you previouls called evaluate, or gradient with the same x.\n\n\n\ngradient!(r::GradientDiffResult, g, x, cfg::GradientConfig)\n\nCompute g(x) and the gradient of g at x at once using the precomputated values in cfg and store thre result in r. This is faster than calling both values separetely.\n\nExample\n\ncfg = GradientConfig(g)\nr = GradientDiffResult(r)\ngradient!(r, g, x, cfg)\n\nvalue(r) == g(x)\ngradient(r) == gradient(g, x, cfg)\n\n\n\n"
 },
 
 {
@@ -269,7 +269,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Fast Evaluation",
     "title": "FixedPolynomials.jacobian",
     "category": "Function",
-    "text": "jacobian!(u, F, x, cfg::JacobianConfig)\n\nEvaluate the jacobian of F at x using the precomputated values in cfg.\n\nExample\n\ncfg = JacobianConfig(F)\njacobian(F, x, cfg)\n\n\n\n"
+    "text": "jacobian!(u, F, x, cfg::JacobianConfig [, precomputed=false])\n\nEvaluate the jacobian of F at x using the precomputated values in cfg.\n\nExample\n\ncfg = JacobianConfig(F)\njacobian(F, x, cfg)\n\nWith precomputed=true we rely on the previous intermediate results in cfg. Therefore the result is only correct if you previouls called evaluate, or jacobian with the same x.\n\n\n\n"
 },
 
 {
@@ -277,7 +277,7 @@ var documenterSearchIndex = {"docs": [
     "page": "Fast Evaluation",
     "title": "FixedPolynomials.jacobian!",
     "category": "Function",
-    "text": "jacobian!(u, F, x, cfg::JacobianConfig)\n\nEvaluate the jacobian of F at x using the precomputated values in cfg and store the result in u.\n\nExample\n\ncfg = JacobianConfig(F)\njacobian!(u, F, x, cfg)\n\n\n\njacobian!(r::JacobianDiffResult, F, x, cfg::JacobianConfig)\n\nCompute F(x) and the jacobian of F at x at once using the precomputated values in cfg and store thre result in r. This is faster than computing both values separetely.\n\nExample\n\ncfg = GradientConfig(g)\nr = GradientDiffResult(cfg)\ngradient!(r, g, x, cfg)\n\nvalue(r) == g(x)\ngradient(r) == gradient(g, x, cfg)\n\n\n\n"
+    "text": "jacobian!(u, F, x, cfg::JacobianConfig [, precomputed=false])\n\nEvaluate the jacobian of F at x using the precomputated values in cfg and store the result in u.\n\nExample\n\ncfg = JacobianConfig(F)\njacobian!(u, F, x, cfg)\n\nWith precomputed=true we rely on the previous intermediate results in cfg. Therefore the result is only correct if you previouls called evaluate, or jacobian with the same x.\n\n\n\njacobian!(r::JacobianDiffResult, F, x, cfg::JacobianConfig)\n\nCompute F(x) and the jacobian of F at x at once using the precomputated values in cfg and store thre result in r. This is faster than computing both values separetely.\n\nExample\n\ncfg = GradientConfig(g)\nr = GradientDiffResult(cfg)\ngradient!(r, g, x, cfg)\n\nvalue(r) == g(x)\ngradient(r) == gradient(g, x, cfg)\n\n\n\n"
 },
 
 {
