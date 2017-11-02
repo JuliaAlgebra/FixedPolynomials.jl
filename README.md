@@ -5,15 +5,15 @@
 | [![][docs-stable-img]][docs-stable-url] | [![Build Status][build-img]][build-url] [![Build Status][winbuild-img]][winbuild-url] |
 | [![][docs-latest-img]][docs-latest-url] | [![Codecov branch][codecov-img]][codecov-url] |
 
-[FixedPolynomials.jl](https://github.com/saschatimme/FixedPolynomials.jl) is a library for
+[FixedPolynomials.jl](https://github.com/juliaalgebra/FixedPolynomials.jl) is a library for
 *really fast* evaluation of multivariate polynomials.
-[Here](https://github.com/saschatimme/FixedPolynomials.jl/pull/3) are the latest benchmark results.
+[Here](https://github.com/juliaalgebra/FixedPolynomials.jl/pull/3) are the latest benchmark results.
 
 Since `FixedPolynomials` polynomials are optimised for fast evaluation they are not suited
 for construction of polynomials.
 It is recommended to construct a polynomial with an implementation of
-[MultivariatePolynomials.jl](https://github.com/blegat/MultivariatePolynomials.jl), e.g.
-[DynamicPolynomials.jl](https://github.com/blegat/DynamicPolynomials.jl), and to
+[MultivariatePolynomials.jl](https://github.com/juliaalgebra/MultivariatePolynomials.jl), e.g.
+[DynamicPolynomials.jl](https://github.com/juliaalgebra/DynamicPolynomials.jl), and to
 convert it then into a `FixedPolynomials.Polynomial` for further computations.
 
 ## Getting started
@@ -52,12 +52,12 @@ jacobian(f, x, cfg)
 
 [docs-stable-img]: https://img.shields.io/badge/docs-stable-blue.svg
 [docs-latest-img]: https://img.shields.io/badge/docs-latest-blue.svg
-[docs-stable-url]: https://saschatimme.github.io/FixedPolynomials.jl/stable
-[docs-latest-url]: https://saschatimme.github.io/FixedPolynomials.jl/latest
+[docs-stable-url]: https://juliaalgebra.github.io/FixedPolynomials.jl/stable
+[docs-latest-url]: https://juliaalgebra.github.io/FixedPolynomials.jl/latest
 
-[build-img]: https://travis-ci.org/saschatimme/FixedPolynomials.jl.svg?branch=master
-[build-url]: https://travis-ci.org/saschatimme/FixedPolynomials.jl
+[build-img]: https://travis-ci.org/juliaalgebra/FixedPolynomials.jl.svg?branch=master
+[build-url]: https://travis-ci.org/juliaalgebra/FixedPolynomials.jl
 [winbuild-img]: https://ci.appveyor.com/api/projects/status/h2yw6aoq480e1etd/branch/master?svg=true
-[winbuild-url]: https://ci.appveyor.com/project/saschatimme/fixedpolynomials-jl/branch/master
-[codecov-img]: https://codecov.io/gh/saschatimme/FixedPolynomials.jl/branch/master/graph/badge.svg
-[codecov-url]: https://codecov.io/gh/saschatimme/FixedPolynomials.jl
+[winbuild-url]: https://ci.appveyor.com/project/juliaalgebra/fixedpolynomials-jl/branch/master
+[codecov-img]: https://codecov.io/gh/juliaalgebra/FixedPolynomials.jl/branch/master/graph/badge.svg
+[codecov-url]: https://codecov.io/gh/juliaalgebra/FixedPolynomials.jl
