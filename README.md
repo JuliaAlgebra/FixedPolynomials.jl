@@ -55,8 +55,8 @@ jacobian(f, x, cfg)
 [docs-stable-url]: https://juliaalgebra.github.io/FixedPolynomials.jl/stable
 [docs-latest-url]: https://juliaalgebra.github.io/FixedPolynomials.jl/latest
 
-[build-img]: https://travis-ci.org/juliaalgebra/FixedPolynomials.jl.svg?branch=master
-[build-url]: https://travis-ci.org/juliaalgebra/FixedPolynomials.jl
+[build-img]: https://travis-ci.org/JuliaAlgebra/FixedPolynomials.jl.svg?branch=master
+[build-url]: https://travis-ci.org/JuliaAlgebra/FixedPolynomials.jl
 [winbuild-img]: https://ci.appveyor.com/api/projects/status/h2yw6aoq480e1etd/branch/master?svg=true
 [winbuild-url]: https://ci.appveyor.com/project/juliaalgebra/fixedpolynomials-jl/branch/master
 [codecov-img]: https://codecov.io/gh/juliaalgebra/FixedPolynomials.jl/branch/master/graph/badge.svg
