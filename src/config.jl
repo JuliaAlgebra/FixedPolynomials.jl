@@ -298,6 +298,7 @@ end
     gradient(g, x, cfg::GradientConfig[, precomputed=false])
 
 Compute the gradient of `g` at `x` using the precomputated values in `cfg`.
+The return vector is constructed using `similar(x, T)`.
 
 ### Example
 ```julia
@@ -310,7 +311,7 @@ the result is only correct if you previouls called `evaluate`, or `gradient` wit
 `x`.
 """
 function gradient(g::Polynomial, x::AbstractVector, cfg::GradientConfig{T}, precomputed=false) where T
-    u = zeros(T, nvariables(g))
+    u = similar(x, T, nvariables(g))
     gradient!(u, g, x, cfg, precomputed)
     u
 end
@@ -467,6 +468,7 @@ end
 
 Evaluate the system `F` at `x` using the precomputated values in `cfg`.
 Note that this is usually signifcant faster than `map(f -> evaluate(f, x), F)`.
+The return vector is constructed using `similar(x, T)`.
 
 ### Example
 ```julia
@@ -479,7 +481,7 @@ the result is only correct if you previouls called `evaluate`, or `jacobian` wit
 `x`.
 """
 function evaluate(G::Vector{<:Polynomial}, x::AbstractVector, cfg::JacobianConfig{T}, precomputed=false) where T
-    evaluate!(zeros(T, length(G)), G, x, cfg, precomputed)
+    evaluate!(similar(x, T, length(G)), G, x, cfg, precomputed)
 end
 
 """
@@ -515,9 +517,10 @@ function evaluate!(u::AbstractVector, G::Vector{<:Polynomial}, x::AbstractVector
 end
 
 """
-    jacobian!(u, F, x, cfg::JacobianConfig [, precomputed=false])
+    jacobian(u, F, x, cfg::JacobianConfig [, precomputed=false])
 
-Evaluate the jacobian of `F` at `x` using the precomputated values in `cfg`.
+Evaluate the jacobian of `F` at `x` using the precomputated values in `cfg`. The return
+matrix is constructed using `similar(x, T, m, n)`.
 
 ### Example
 ```julia
@@ -530,7 +533,7 @@ the result is only correct if you previouls called `evaluate`, or `jacobian` wit
 `x`.
 """
 function jacobian(g::Vector{<:Polynomial}, x::AbstractVector, cfg::JacobianConfig{T}, precomputed=false) where T
-    u = zeros(T, length(g), length(x))
+    u = similar(x, T, (length(g), length(x)))
     jacobian!(u, g, x, cfg, precomputed)
     u
 end
