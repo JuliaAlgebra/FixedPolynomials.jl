@@ -221,6 +221,7 @@ end
 
 (p::Polynomial)(x) = evaluate(p, x)
 
+evaluate(F::Vector{<:Polynomial}, x::AbstractVector) = map(f -> evaluate(f, x), F)
 """
     substitute(p::Polynomial, i, x)
 
@@ -349,8 +350,8 @@ end
 Makes `p` homogenous, if `ishomogenized(p)` is `true` this is just the identity.
 The homogenization variable will always be considered as the first variable of the polynomial.
 """
-function homogenize(p::Polynomial, variable::Symbol=:x0)
-    if p.homogenized
+function homogenize(p::Polynomial, variable::Symbol=:x0; respect_homogenous=true)
+    if p.homogenized || (respect_homogenous && ishomogenous(p))
         p
     else
         monomials_degree = sum(exponents(p), 1)

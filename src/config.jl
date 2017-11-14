@@ -5,7 +5,7 @@ const Index = UInt16
 const Delimiter = UInt16
 const Exponent = UInt16
 
-struct PolyConfig{T}
+mutable struct PolyConfig{T}
     monomials_delimiters::Vector{Delimiter}
     monomials::Vector{Index}
     grad_monomials_delimiters::Vector{Vector{Tuple{Delimiter, Exponent}}}
