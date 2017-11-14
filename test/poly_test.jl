@@ -60,12 +60,12 @@
     @test ishomogenous(p) == true
     @test string(homogenize(Polynomial([1 1; 0 2], [-2.0, 3.0]))) == "-2.0x₀²x₁+3.0x₁x₂²"
     @test ishomogenized(p) == false
-    @test ishomogenized(homogenize(p)) == true
+    @test ishomogenized(homogenize(p)) == false
     @test dehomogenize(p) == p
     @test dehomogenize(homogenize(p)) == p
     @test dehomogenize(homogenize(homogenize(p))) == p
 
-    exponents(homogenize(p))[2:end, :]
+    #exponents(homogenize(p))[2:end, :]
 
     f = Polynomial([2 1 0;0 1 2], [3.0, 2.0, -1.0])
     g = Polynomial([2 1 0;0 1 2], [-2.5+2im,-3.0, 4.0])
