@@ -78,16 +78,16 @@ function PolyConfig(g::Polynomial{T}, reduced_exponents::Matrix{UInt16}, big_loo
         zeros(promote_type(T, S), n))
 end
 
-function Base.deepcopy(cfg::PolyConfig)
-    PolyConfig(
-        deepcopy(cfg.monomials_delimiters),
-        deepcopy(cfg.monomials),
-        deepcopy(cfg.grad_monomials_delimiters),
-        deepcopy(cfg.grad_monomials),
-        deepcopy(cfg.reduced_exponents_delimiters),
-        deepcopy(cfg.reduced_exponents_map),
-        deepcopy(cfg.reduced_values))
-end
+# function Base.deepcopy(cfg::PolyConfig)
+#     PolyConfig(
+#         deepcopy(cfg.monomials_delimiters),
+#         deepcopy(cfg.monomials),
+#         deepcopy(cfg.grad_monomials_delimiters),
+#         deepcopy(cfg.grad_monomials),
+#         deepcopy(cfg.reduced_exponents_delimiters),
+#         deepcopy(cfg.reduced_exponents_map),
+#         deepcopy(cfg.reduced_values))
+# end
 
 @inline function fillreduced_values!(
     cfg::PolyConfig{T},
@@ -105,21 +105,21 @@ end
     k = 1
     j = 1
     nextj_at = j + reds[j]
-    res = cfs[j]
+    @inbounds res = cfs[j]
     while k ≤ N || j < n
         togo = nextj_at - k
         if togo == 0
-            v[j] = res
+            @inbounds v[j] = res
             j += 1
-            nextj_at += reds[j]
-            res = cfs[j]
+            @inbounds nextj_at += reds[j]
+            @inbounds res = cfs[j]
         else
-            i, l = rem[k]
-            res *= dv[i, l]
+            @inbounds i, l = rem[k]
+            @inbounds res *= dv[i, l]
             k += 1
         end
     end
-    v[j] = res
+    @inbounds v[j] = res
     v
 end
 
@@ -133,14 +133,14 @@ end
         return values
     end
     for i=1:m
-        l = diffs[i,1]
+        @inbounds l = diffs[i,1]
         xi = xs[i]
         v = l == 0 ? one(T) : pow(xi, l)
-        values[i, 1] = v
+        @inbounds values[i, 1] = v
         for k=2:n
-            l = diffs[i,k]
+            @inbounds l = diffs[i,k]
             v = l == 0 ? v : v * pow(xi, l)
-            values[i,k] = v
+            @inbounds values[i,k] = v
         end
     end
     nothing
@@ -155,15 +155,15 @@ end
     n = length(mds)
     k = 1
     j = 1
-    nextj_at = j + mds[j]
-    res = v[j]
+    @inbounds nextj_at = j + mds[j]
+    @inbounds res = v[j]
     out = zero(T)
     while k ≤ N || j < n
         if k == nextj_at
             out += res
             j += 1
-            nextj_at += mds[j]
-            res = v[j]
+            @inbounds nextj_at += mds[j]
+            @inbounds res = v[j]
         else
             res *= x[ms[k]]
             k += 1
@@ -180,7 +180,8 @@ end
     gms = cfg.grad_monomials
 
     for i=1:length(gmds)
-        u[i] = _gradient(v, gmds[i], gms[i], x)
+        @inbounds ui = _gradient(v, gmds[i], gms[i], x)
+        u[i] = ui
     end
     u
 end
@@ -195,7 +196,8 @@ Store the gradient in the i-th row of 'u'.
     gms = cfg.grad_monomials
 
     for j=1:length(gmds)
-        u[i, j] = _gradient(v, gmds[j], gms[j], x)
+        @inbounds uij = _gradient(v, gmds[j], gms[j], x)
+        u[i, j] = uij
     end
     u
 end
@@ -205,17 +207,17 @@ function _gradient(v::AbstractVector{T}, mds, ms, x) where T
     n = length(mds)
     k = 1
     j = 1
-    delim, exponent = mds[j]
+    @inbounds delim, exponent = mds[j]
     nextj_at = j + delim
-    res = v[j] * exponent
+    @inbounds res = v[j] * exponent
     out = zero(T)
     while k ≤ N || j < n
         if k == nextj_at
             out += res
             j += 1
-            delim, exponent = mds[j]
+            @inbounds delim, exponent = mds[j]
             nextj_at += delim
-            res = exponent == 0 ? zero(T) : v[j] * exponent
+            @inbounds res = exponent == 0 ? zero(T) : v[j] * exponent
         else
             res *= x[ms[k]]
             k += 1
@@ -263,12 +265,12 @@ function differences(f::Polynomial{T}, ::Type{S}) where {T, S}
 end
 
 
-function Base.deepcopy(cfg::GradientConfig)
-    GradientConfig(
-        deepcopy(cfg.poly),
-        deepcopy(cfg.differences),
-        deepcopy(cfg.differences_values))
-end
+# function Base.deepcopy(cfg::GradientConfig)
+#     GradientConfig(
+#         deepcopy(cfg.poly),
+#         deepcopy(cfg.differences),
+#         deepcopy(cfg.differences_values))
+# end
 
 """
     evaluate(g, x, cfg::GradientConfig [, precomputed=false])

@@ -16,6 +16,10 @@
     @test [p(w) for p in ∇f] ≈ FixedPolynomials.gradient!(u, f, w, cfg)
     @test [p(w) for p in ∇f] ≈ u
 
+    @test_throws BoundsError FixedPolynomials.gradient(f, rand(2), cfg)
+    @test_throws BoundsError FixedPolynomials.gradient!(u, f, rand(2), cfg)
+    @test_throws BoundsError FixedPolynomials.gradient!(u[1:2], f, w, cfg)
+
     cfg = GradientConfig(f, Complex128)
     wc = rand(Complex128, 3)
     uc = zeros(Complex128, 3)
@@ -68,6 +72,9 @@
     @test [f(w), g(w)] ≈ evaluate!(u, [f, g], w, cfg)
     @test [f(w), g(w)] ≈ u
 
+    @test_throws BoundsError evaluate([f], w, cfg)
+    @test_throws BoundsError evaluate([f, g], rand(2), cfg)
+
     u = zeros(2)
     cfg = JacobianConfig([f, g], w)
     jacobian([f, g], w, cfg)
@@ -84,6 +91,10 @@
     @test DF ≈ jacobian([f, g], w, cfg, true)
     @test DF ≈ jacobian!(U, [f, g], w, cfg, true)
     @test DF ≈ U
+    @test_throws BoundsError jacobian([f, g], rand(2), cfg)
+    @test_throws BoundsError jacobian!(U[1:end-1,:],[f, g], w, cfg)
+    @test_throws BoundsError jacobian!(U[:,1:end-1],[f, g], w, cfg)
+
 
     r = JacobianDiffResult(cfg)
     jacobian!(r, [f, g], w, cfg)
