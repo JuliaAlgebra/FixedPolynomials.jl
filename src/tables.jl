@@ -1,7 +1,7 @@
 
 function computetables(exponents::Matrix{T}) where {T<:Integer}
     m, n = size(exponents)
-    lookuptable = exponents'
+    lookuptable = permutedims(exponents, (2, 1))
 
     for j=1:m
         sort!(@view lookuptable[:, j])
@@ -29,7 +29,7 @@ function computetables(exponents::Matrix{T}) where {T<:Integer}
         differences[i, j] = lookuptable[j, i]
     end
 
-    lookuptable = reshape(lookuptable, (m, n))
+    lookuptable = permutedims(lookuptable, (2, 1))
     for j=1:n, i=1:m
         for k = 1:maxk
             if differences[i, k] == exponents[i, j]
