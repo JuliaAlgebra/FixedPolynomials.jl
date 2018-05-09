@@ -31,7 +31,7 @@ But this is note the fastest way possible. In order to achieve the best performa
 intermediate storage. For this we have [`GradientConfig`](@ref) and [`JacobianConfig`](@ref).
 For single polynomial the API is as follows
 ```julia
-cfg = GradientConfig(f) # this can be reused!
+cfg = config(f, x) # this can be reused!
 f(x) == evaluate(f, x, cfg)
 # We can also compute the gradient of f at x
 map(g -> g(x), ∇f) == gradient(f, x, cfg)
@@ -39,7 +39,8 @@ map(g -> g(x), ∇f) == gradient(f, x, cfg)
 
 We also have support for systems of polynomials:
 ```julia
-cfg = JacobianConfig([f, f]) # this can be reused!
+F = System([f, g])
+cfg = config(F, x) # this can be reused!
 [f(x), f(x)] == evaluate([f, f] x, cfg)
 # We can also compute the jacobian of [f, f] at x
 jacobian(f, x, cfg)
@@ -56,6 +57,6 @@ Make sure to also check out [`GradientDiffResult`](@ref) and [`JacobianDiffResul
 ## Safety notes
 
 !!! warning
-    For the evaluation multivariate variant of [Horner's method](https://en.wikipedia.org/wiki/Horner%27s_method)
-    is used. Due to that for polynomials with terms of degree over 43 we cannot guarantee
+    The current implementation is not numerically stable in the sense that
+    for polynomials with terms of degree over 43 we cannot guarantee
     an error of less than 1 [ULP](https://en.wikipedia.org/wiki/Unit_in_the_last_place).
