@@ -14,10 +14,18 @@ end
 function System(polys::Vector{<:MP.AbstractPolynomialLike}, variables=_variables(polys))
     System([Polynomial(p, variables) for p in polys])
 end
-_variables(polys) = sort!(union(Iterators.flatten(MP.variables.(ps))), rev=true)
+_variables(polys) = sort!(union(Iterators.flatten(MP.variables.(polys))), rev=true)
 
 Base.length(F::System) = length(F.polys)
 Base.getindex(F::System, i) = getindex(F.polys, i)
+
+
+"""
+    nvariables(F::System)
+
+Returns the number of variables of `F`.
+"""
+nvariables(F::System) = size(exponents(F[1]), 1)
 
 """
 
