@@ -10,7 +10,8 @@
     w = rand(3)
     u = zeros(3)
 
-    cfg = GradientConfig(f, w)
+    cfg = config(f, w)
+    @test cfg isa GradientConfig
     @test f(w) ≈ evaluate(f, w, cfg)
     @test [p(w) for p in ∇f] ≈ FixedPolynomials.gradient(f, w, cfg)
     @test [p(w) for p in ∇f] ≈ FixedPolynomials.gradient!(u, f, w, cfg)
@@ -20,35 +21,25 @@
     @test_throws BoundsError FixedPolynomials.gradient!(u, f, rand(2), cfg)
     @test_throws BoundsError FixedPolynomials.gradient!(u[1:2], f, w, cfg)
 
-    cfg = GradientConfig(f, Complex128)
     wc = rand(Complex128, 3)
     uc = zeros(Complex128, 3)
+    cfg = config(f, wc)
+    @test cfg isa GradientConfig
     @test f(wc) ≈ evaluate(f, wc, cfg)
     @test [p(wc) for p in ∇f] ≈ FixedPolynomials.gradient(f, wc, cfg)
     @test [p(wc) for p in ∇f] ≈ FixedPolynomials.gradient!(uc, f, wc, cfg)
     @test [p(wc) for p in ∇f] ≈ uc
 
-    cfg = GradientConfig(f)
-    @test f(w) ≈ evaluate(f, w, cfg)
-    @test [p(w) for p in ∇f] ≈ FixedPolynomials.gradient(f, w, cfg)
-    @test [p(w) for p in ∇f] ≈ FixedPolynomials.gradient!(u, f, w, cfg)
-    @test [p(w) for p in ∇f] ≈ u
-
-    cfg = GradientConfig(f)
+    cfg = config(f, w)
     @test f(w) ≈ evaluate(f, w, cfg)
     @test [p(w) for p in ∇f] ≈ FixedPolynomials.gradient(f, w, cfg, true)
-
-    cfg = GradientConfig(f)
     @test [p(w) for p in ∇f] ≈ FixedPolynomials.gradient(f, w, cfg)
     @test f(w) ≈ evaluate(f, w, cfg, true)
 
-    cfg = GradientConfig(f)
     u = zeros(3)
     @test f(w) ≈ evaluate(f, w, cfg)
     @test [p(w) for p in ∇f] ≈ FixedPolynomials.gradient!(u, f, w, cfg, true)
 
-    cfg2 = deepcopy(cfg)
-    @test cfg2 !== cfg
 
     r = GradientDiffResult(cfg)
 
@@ -64,49 +55,4 @@
 
 
     @test_throws MethodError GradientConfig([f, f], w)
-    @test_throws MethodError JacobianConfig(f, w)
-
-    u = zeros(2)
-    cfg = JacobianConfig([f, g], w)
-    @test [f(w), g(w)] ≈ evaluate([f, g], w, cfg)
-    @test [f(w), g(w)] ≈ evaluate!(u, [f, g], w, cfg)
-    @test [f(w), g(w)] ≈ u
-
-    @test_throws BoundsError evaluate([f], w, cfg)
-    @test_throws BoundsError evaluate([f, g], rand(2), cfg)
-
-    u = zeros(2)
-    cfg = JacobianConfig([f, g], w)
-    jacobian([f, g], w, cfg)
-    @test [f(w), g(w)] ≈ evaluate([f, g], w, cfg, true)
-    @test [f(w), g(w)] ≈ evaluate!(u, [f, g], w, cfg, true)
-    @test [f(w), g(w)] ≈ u
-
-    cfg2 = deepcopy(cfg)
-    @test cfg2 !== cfg
-
-    U = zeros(2, 3)
-    DF = vcat(RowVector([p(w) for p in ∇f]), [p(w) for p in ∇g] |> RowVector)
-    evaluate([f, g], w, cfg)
-    @test DF ≈ jacobian([f, g], w, cfg, true)
-    @test DF ≈ jacobian!(U, [f, g], w, cfg, true)
-    @test DF ≈ U
-    @test_throws BoundsError jacobian([f, g], rand(2), cfg)
-    @test_throws BoundsError jacobian!(U[1:end-1,:],[f, g], w, cfg)
-    @test_throws BoundsError jacobian!(U[:,1:end-1],[f, g], w, cfg)
-
-
-    r = JacobianDiffResult(cfg)
-    jacobian!(r, [f, g], w, cfg)
-    @test DF ≈ jacobian(r)
-    @test [f(w), g(w)] ≈ value(r)
-
-
-    v = zeros(3)
-    V = zeros(3, 3)
-
-    r = JacobianDiffResult((@view v[1:2]), (@view V[1:2, :]))
-    jacobian!(r, [f, g], w, cfg)
-    @test DF ≈ jacobian(r)
-    @test [f(w), g(w)] ≈ value(r)
 end

@@ -15,5 +15,6 @@ module FixedPolynomials
     include("convert_promote.jl")
     include("tables.jl")
     include("config.jl")
+    include("system.jl")
 
 end
