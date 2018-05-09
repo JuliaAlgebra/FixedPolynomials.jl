@@ -48,6 +48,9 @@
     @test DF ≈ jacobian(r)
     @test [f(w), g(w)] ≈ value(r)
 
+    u, U = evaluate_and_jacobian(F, w, cfg)
+    @test U ≈ jacobian(r)
+    @test u ≈ value(r)
 
     v = zeros(3)
     V = zeros(3, 3)
