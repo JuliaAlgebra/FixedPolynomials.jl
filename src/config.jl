@@ -78,7 +78,7 @@ function PolyConfig(g::Polynomial{T}, reduced_exponents::Matrix{UInt16}, big_loo
         zeros(typeof(one(T) * one(S) + one(T) * one(S)), n))
 end
 
-@inline function fillreduced_values!(
+function fillreduced_values!(
     cfg::PolyConfig{T},
     g::Polynomial,
     x::AbstractVector,
@@ -94,14 +94,14 @@ end
     k = 1
     j = 1
     nextj_at = j + reds[j]
-    @inbounds res = cfs[j]
+    @inbounds res = convert(T, cfs[j])
     while k ≤ N || j < n
         togo = nextj_at - k
         if togo == 0
             @inbounds v[j] = res
             j += 1
             @inbounds nextj_at += reds[j]
-            @inbounds res = cfs[j]
+            @inbounds res = convert(T, cfs[j])
         else
             @inbounds i, l = rem[k]
             @inbounds res *= dv[i, l]
