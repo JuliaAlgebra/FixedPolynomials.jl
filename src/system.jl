@@ -245,9 +245,6 @@ function JacobianDiffResult(cfg::JacobianConfig{T}) where T
         zeros(T, length(cfg.polys), size(cfg.differences, 1)))
 end
 
-function JacobianDiffResult(value::AbstractVector{T}, jacobian::AbstractMatrix{T}) where T
-    JacobianDiffResult{T, typeof(value), typeof(jacobian)}(value, jacobian)
-end
 value(r::JacobianDiffResult) = r.value
 jacobian(r::JacobianDiffResult) = r.jacobian
 

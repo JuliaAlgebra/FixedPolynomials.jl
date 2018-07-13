@@ -19,7 +19,7 @@ function PolyConfig(g::Polynomial{T}, reduced_exponents::Matrix{UInt16}, big_loo
     exponents = g.exponents
     m, n = size(reduced_exponents)
 
-    reduced_exponents_delimiters = Vector{UInt16}(n)
+    reduced_exponents_delimiters = Vector{UInt16}(undef, n)
     reduced_exponents_map = Vector{NTuple{2, UInt16}}()
     for j=1:n
         nindices = 0
@@ -33,7 +33,7 @@ function PolyConfig(g::Polynomial{T}, reduced_exponents::Matrix{UInt16}, big_loo
     end
 
     # monomials_full = BitMatrix(exponents)
-    monomials_delimiters = Vector{UInt16}(n)
+    monomials_delimiters = Vector{UInt16}(undef, n)
     monomials = Vector{UInt16}()
     for j=1:n
         nindices = 0
@@ -46,10 +46,10 @@ function PolyConfig(g::Polynomial{T}, reduced_exponents::Matrix{UInt16}, big_loo
         monomials_delimiters[j] = nindices
     end
 
-    grad_monomials_delimiters = Vector{Vector{Tuple{Delimiter, Exponent}}}(m)
-    grad_monomials = Vector{Vector{Index}}(m)
+    grad_monomials_delimiters = Vector{Vector{Tuple{Delimiter, Exponent}}}(undef, m)
+    grad_monomials = Vector{Vector{Index}}(undef, m)
     for varindex = 1:m
-        imonomials_delimiters = Vector{Tuple{Delimiter, Exponent}}(n)
+        imonomials_delimiters = Vector{Tuple{Delimiter, Exponent}}(undef, n)
         imonomials = Vector{Index}()
         for j=1:n
             nindices = 0
@@ -369,7 +369,7 @@ mutable struct GradientDiffResult{T, AV<:AbstractVector{T}}
 end
 
 function GradientDiffResult(cfg::GradientConfig{T}) where T
-    GradientDiffResult{T, Vector{T}}(zero(T), Vector{T}(size(cfg.differences, 1)))
+    GradientDiffResult{T, Vector{T}}(zero(T), Vector{T}(undef, size(cfg.differences, 1)))
 end
 function GradientDiffResult(grad::AbstractVector{T}) where T
     GradientDiffResult{T, Vector{T}}(zero(T), grad)

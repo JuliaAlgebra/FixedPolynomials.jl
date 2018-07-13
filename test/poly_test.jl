@@ -88,7 +88,7 @@
     # Due to bug during evaluation of "empty" polynomials
     F = convert(Vector{Polynomial{Float64}}, [f, g, h])
 
-    J = [differentiate(f, i) for f in F, i=1:nvariables.(F[1])]
+    J = [differentiate(f, i) for f in F, i=1:nvariables(F[1])]
     u = rand(3)
     @test map(f -> evaluate(f, u), J) == [1.0  1.0  2.0; 1.0  0.0  1.0; 0.0  1.0  1.0]
 end

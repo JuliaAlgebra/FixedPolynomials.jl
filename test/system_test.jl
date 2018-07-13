@@ -1,3 +1,4 @@
+using LinearAlgebra
 
 @testset "System" begin
     Impl.@polyvar x y z
@@ -33,7 +34,7 @@
     @test cfg2 !== cfg
 
     U = zeros(2, 3)
-    DF = vcat(RowVector([p(w) for p in ∇f]), [p(w) for p in ∇g] |> RowVector)
+    DF = vcat(Transpose([p(w) for p in ∇f]), [p(w) for p in ∇g] |> Transpose)
     evaluate(F, w, cfg)
     @test DF ≈ jacobian(F, w, cfg, true)
     @test DF ≈ jacobian!(U, F, w, cfg, true)

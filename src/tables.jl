@@ -24,7 +24,7 @@ function computetables(exponents::Matrix{T}) where {T<:Integer}
     end
     # now we copy the relevant subsection
     # we do not compute the differences now since we need to compute the lookuptable first
-    differences = Matrix{UInt8}(m, maxk)
+    differences = Matrix{UInt8}(undef, m, maxk)
     for i=1:m, j=1:maxk
         differences[i, j] = lookuptable[j, i]
     end
