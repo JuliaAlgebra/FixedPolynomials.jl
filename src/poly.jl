@@ -64,8 +64,8 @@ function _coefficients_exponents(poly::MP.AbstractPolynomialLike{T}, vars) where
     terms = MP.terms(poly)
     nterms = length(terms)
     nvars = length(vars)
-    exps = Matrix{Int}(nvars, nterms)
-    coefficients = Vector{T}(nterms)
+    exps = Matrix{Int}(undef, nvars, nterms)
+    coefficients = Vector{T}(undef, nterms)
     for j = 1:nterms
         term = terms[j]
         coefficients[j] = MP.coefficient(term)
@@ -244,7 +244,7 @@ function substitute(p::Polynomial{S}, varindex, x::T) where {S<:Number, T<:Numbe
 
     for j = 1:nterms
         coeff = cfs[j]
-        exp = Vector{Int}(nvars - 1)
+        exp = Vector{Int}(undef, nvars - 1)
         # first we calculate the new coefficient and remove the varindex-th row
         for i = 1:nvars
             if i == varindex
@@ -339,7 +339,7 @@ Checks whether `p` is a homogenous polynomial. Note that this is unaffected from
 value of `homogenized(p)`.
 """
 function ishomogenous(p::Polynomial)
-    monomials_degree = sum(exponents(p), 1)
+    monomials_degree = Compat.sum(exponents(p), dims=1)
     max_deg = monomials_degree[1]
     all(x -> x == max_deg, monomials_degree)
 end
@@ -354,7 +354,7 @@ function homogenize(p::Polynomial, variable::Symbol=:x0; respect_homogenous=true
     if p.homogenized || (respect_homogenous && ishomogenous(p))
         p
     else
-        monomials_degree = sum(exponents(p), 1)
+        monomials_degree = Compat.sum(exponents(p), dims=1)
         max_deg = monomials_degree[1]
         Polynomial([max_deg .- monomials_degree; exponents(p)], coefficients(p), [variable; variables(p)], true)
     end

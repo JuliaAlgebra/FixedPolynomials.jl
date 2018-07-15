@@ -11,7 +11,7 @@
     @test variables(p) == [:x1, :x2, :x3]
     @test degree(p) == 4
 
-    @test (convert(Polynomial{Complex128}, p) isa Polynomial{Complex128})
+    @test (convert(Polynomial{ComplexF64}, p) isa Polynomial{ComplexF64})
     q = Polynomial([3 1; 1 1; 0 2], [-2, 3], [:x_1, :x_2, :x_3])
     prom_p, prom_q = promote(p,q)
     @test typeof(prom_p) == typeof(prom_q)
@@ -88,7 +88,7 @@
     # Due to bug during evaluation of "empty" polynomials
     F = convert(Vector{Polynomial{Float64}}, [f, g, h])
 
-    J = [differentiate(f, i) for f in F, i=1:nvariables.(F[1])]
+    J = [differentiate(f, i) for f in F, i=1:nvariables(F[1])]
     u = rand(3)
     @test map(f -> evaluate(f, u), J) == [1.0  1.0  2.0; 1.0  0.0  1.0; 0.0  1.0  1.0]
 end

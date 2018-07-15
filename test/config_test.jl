@@ -21,8 +21,8 @@
     @test_throws BoundsError FixedPolynomials.gradient!(u, f, rand(2), cfg)
     @test_throws BoundsError FixedPolynomials.gradient!(u[1:2], f, w, cfg)
 
-    wc = rand(Complex128, 3)
-    uc = zeros(Complex128, 3)
+    wc = rand(ComplexF64, 3)
+    uc = zeros(ComplexF64, 3)
     cfg = config(f, wc)
     @test cfg isa GradientConfig
     @test f(wc) ≈ evaluate(f, wc, cfg)

@@ -1,8 +1,9 @@
 using FixedPolynomials
-using Base.Test
+using Compat.Test
+using Compat
 
 import DynamicPolynomials
-Impl = DynamicPolynomials
+const Impl = DynamicPolynomials
 include("poly_test.jl")
 include("config_test.jl")
 include("system_test.jl")
