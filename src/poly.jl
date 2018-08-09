@@ -148,26 +148,20 @@ degree(p::Polynomial) = sum(exponents(p)[:,1])
 
 ==(p::Polynomial, q::Polynomial) = exponents(p) == exponents(q) && coefficients(p) == coefficients(q)
 Base.isequal(p::Polynomial, q::Polynomial) = exponents(p) == exponents(q) && coefficients(p) == coefficients(q)
-function Base.deepcopy(f::Polynomial{T}) where T
-    Polynomial{T}(
-        f.exponents,
-        f.coefficients,
-        f.variables,
-        f.homogenized)
-end
 
 # ITERATOR
-Base.start(p::Polynomial) = (1, nterms(p))
-function Base.next(p::Polynomial, state::Tuple{Int,Int})
-    (i, limit) = state
-    newstate = (i + 1, limit)
-    val = (coefficients(p)[i], exponents(p)[:,i])
+function Base.iterate(p::Polynomial, state...)
+    n = nterms(p)
+    istate = iterate(1:n, state...)
+    istate === nothing && return nothing
 
-    (val, newstate)
+    i, state = istate
+    (coefficients(p)[i], exponents(p)[:,i]), state
 end
-Base.done(p::Polynomial, state) = state[1] > state[2]
 Base.length(p::Polynomial) = nterms(p)
 Base.eltype(p::Polynomial{T}) where {T} = T
+
+Base.broadcastable(p::Polynomial) = Ref(p)
 
 @inline pow(x::AbstractFloat, k::Integer) = Base.FastMath.pow_fast(x, k)
 #@inline pow(x::Complex, k::Integer) = k == 1 ? x : x^k
@@ -339,7 +333,7 @@ Checks whether `p` is a homogenous polynomial. Note that this is unaffected from
 value of `homogenized(p)`.
 """
 function ishomogenous(p::Polynomial)
-    monomials_degree = Compat.sum(exponents(p), dims=1)
+    monomials_degree = sum(exponents(p), dims=1)
     max_deg = monomials_degree[1]
     all(x -> x == max_deg, monomials_degree)
 end
@@ -354,7 +348,7 @@ function homogenize(p::Polynomial, variable::Symbol=:x0; respect_homogenous=true
     if p.homogenized || (respect_homogenous && ishomogenous(p))
         p
     else
-        monomials_degree = Compat.sum(exponents(p), dims=1)
+        monomials_degree = sum(exponents(p), dims=1)
         max_deg = monomials_degree[1]
         Polynomial([max_deg .- monomials_degree; exponents(p)], coefficients(p), [variable; variables(p)], true)
     end
