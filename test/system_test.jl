@@ -1,4 +1,4 @@
-using Compat.LinearAlgebra
+using LinearAlgebra
 
 @testset "System" begin
     Impl.@polyvar x y z

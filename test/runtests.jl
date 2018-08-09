@@ -1,6 +1,5 @@
 using FixedPolynomials
-using Compat.Test
-using Compat
+using Test
 
 import DynamicPolynomials
 const Impl = DynamicPolynomials

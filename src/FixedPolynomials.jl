@@ -8,10 +8,6 @@ module FixedPolynomials
     abstract type AbstractPolySystem{T} end
     export AbstractPolySystem
 
-    using Compat
-
-    #import Base: gradient
-
     include("poly.jl")
     include("show.jl")
     include("convert_promote.jl")
