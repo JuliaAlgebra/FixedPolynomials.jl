@@ -9,12 +9,13 @@ function Base.show(io::IO, p::Polynomial)
     print_poly(io, p, variables(p))
 end
 
-# function Base.show(io::IO, P::PolynomialSystem)
-#     for p in P.polys
-#         print_poly(io, p, P.vars)
-#         print(io, "\n")
-#     end
-# end
+function Base.show(io::IO, P::System{T}) where T
+    print(io, "System{$T}:")
+    for p in P.polys
+        print(io, "\n")
+        print_poly(io, p, variables(p))
+    end
+end
 
 #helpers
 

@@ -9,10 +9,10 @@ module FixedPolynomials
     export AbstractPolySystem
 
     include("poly.jl")
-    include("show.jl")
     include("convert_promote.jl")
     include("tables.jl")
     include("config.jl")
     include("system.jl")
+    include("show.jl")
 
 end

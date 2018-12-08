@@ -78,6 +78,7 @@ function PolyConfig(g::Polynomial{T}, reduced_exponents::Matrix{UInt16}, big_loo
         zeros(typeof(one(T) * one(S) + one(T) * one(S)), n))
 end
 
+Base.show(io::IO, C::PolyConfig) = print(io, typeof(C), "()")
 function fillreduced_values!(
     cfg::PolyConfig{T},
     g::Polynomial,
@@ -243,6 +244,8 @@ function GradientConfig(f::Polynomial{T}, ::Type{S}) where {T, S}
 
     GradientConfig(poly, diffs, diffs_values)
 end
+
+Base.show(io::IO, C::GradientConfig) = print(io, typeof(C), "()")
 
 """
     config(F::Polynomial, x)

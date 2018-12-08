@@ -21,6 +21,8 @@ using LinearAlgebra
     @test [f(w), g(w)] ≈ evaluate!(u, F, w, cfg)
     @test [f(w), g(w)] ≈ u
 
+    @test !isempty(sprint, show, F)
+    @test !isempty(sprint(show, cfg))
     @test_throws BoundsError evaluate(F, rand(2), cfg)
 
     u = zeros(2)
