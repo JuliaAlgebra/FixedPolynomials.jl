@@ -1,24 +1,5 @@
-import Base: print
-
-function Base.show(io::IO, p::Polynomial)
-    # if p.homogenized
-    #     vars = ["x$i" for i=0:nvariables(p)-1]
-    # else
-    #     vars = ["x$i" for i=1:nvariables(p)]
-    # end
-    print_poly(io, p, variables(p))
-end
-
-# function Base.show(io::IO, P::PolynomialSystem)
-#     for p in P.polys
-#         print_poly(io, p, P.vars)
-#         print(io, "\n")
-#     end
-# end
-
-#helpers
-
-function print_poly(io::IO, p::Polynomial{T}, vars) where T
+function Base.show(io::IO, p::Polynomial{T}) where {T}
+    vars = variables(p)
     first = true
     exps = exponents(p)
     cfs = coefficients(p)
@@ -42,9 +23,9 @@ function print_poly(io::IO, p::Polynomial{T}, vars) where T
 
         for (var, power) in zip(vars, exp)
             if power == 1
-                print(io, "$(pretty_var(var))")
+                print(io, pretty_var(var))
             elseif power > 1
-                print(io, "$(pretty_var(var))$(pretty_power(power))")
+                print(io, pretty_var(var), pretty_power(power))
             end
         end
     end
@@ -54,66 +35,36 @@ function print_poly(io::IO, p::Polynomial{T}, vars) where T
     end
 end
 
-function unicode_subscript(i)
-    if i == 0
-        "\u2080"
-    elseif i == 1
-        "\u2081"
-    elseif i == 2
-        "\u2082"
-    elseif i == 3
-        "\u2083"
-    elseif i == 4
-        "\u2084"
-    elseif i == 5
-        "\u2085"
-    elseif i == 6
-        "\u2086"
-    elseif i == 7
-        "\u2087"
-    elseif i == 8
-        "\u2088"
-    elseif i == 9
-        "\u2089"
+const SUBSCRIPT_TABLE = ('\u2080', '\u2081', '\u2082', '\u2083', '\u2084', '\u2085', '\u2086', '\u2087', '\u2088', '\u2089')
+const SUPERSCRIPT_TABLE = ('\u2070', '\u00b9', '\u00b2', '\u00b3', '\u2074', '\u2075', '\u2076', '\u2077', '\u2078', '\u2079')
+
+unicode_subscript(i::Int) = (SUBSCRIPT_TABLE[i + 1])
+unicode_superscript(i::Int) = (SUPERSCRIPT_TABLE[i + 1])
+
+function pretty_power(pow::Int)
+    io_out = IOBuffer()
+    _digits = digits(pow)
+    for i in _digits
+        print(io_out, unicode_superscript(i))
     end
+    return reverse(String(take!(io_out)))
 end
-
-
-function unicode_superscript(i)
-    if i == 0
-        "\u2070"
-    elseif i == 1
-        "\u00B9"
-    elseif i == 2
-        "\u00B2"
-    elseif i == 3
-        "\u00B3"
-    elseif i == 4
-        "\u2074"
-    elseif i == 5
-        "\u2075"
-    elseif i == 6
-        "\u2076"
-    elseif i == 7
-        "\u2077"
-    elseif i == 8
-        "\u2078"
-    elseif i == 9
-        "\u2079"
-    end
-end
-
-pretty_power(pow::Int) = join(map(unicode_superscript, reverse(digits(pow))))
 
 function pretty_var(var::String)
-    m = match(r"([a-zA-Z]+)(?:_*)(\d+)", var)
-    if m === nothing
-        var
-    else
-        base = string(m.captures[1])
-        index = parse(Int, m.captures[2])
-        base * join(map(unicode_subscript, reverse(digits(index))))
+    m1 = match(r"([a-zA-Z]+)(?:_*)(\d+)", var)
+    m2 = match(r"([a-zA-Z]+)(?:\[)(\d+)(?:\])", var)
+    if isnothing(m1) && isnothing(m2)
+        return var
     end
+    m = isnothing(m1) ? m2 : m1
+    io_out = IOBuffer()
+    print(io_out, m.captures[1])
+    index = parse(Int, m.captures[2])
+    _digits = reverse(digits(index))
+    for i in _digits
+        print(io_out, unicode_subscript(i))
+    end
+    return String(take!(io_out))
 end
 pretty_var(var) = pretty_var(string(var))
 
