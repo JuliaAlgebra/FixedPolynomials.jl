@@ -54,54 +54,17 @@ function print_poly(io::IO, p::Polynomial{T}, vars) where T
     end
 end
 
-function unicode_subscript(i)
-    if i == 0
-        "\u2080"
-    elseif i == 1
-        "\u2081"
-    elseif i == 2
-        "\u2082"
-    elseif i == 3
-        "\u2083"
-    elseif i == 4
-        "\u2084"
-    elseif i == 5
-        "\u2085"
-    elseif i == 6
-        "\u2086"
-    elseif i == 7
-        "\u2087"
-    elseif i == 8
-        "\u2088"
-    elseif i == 9
-        "\u2089"
-    end
-end
+# const SUBSCRIPT_TABLE = (0x2080, 0x2081, 0x2082, 0x2083, 0x2084, 0x2085, 0x2086, 0x2087, 0x2088, 0x2089)
+# const SUPERSCRIPT_TABLE = (0x2070, 0x00b9, 0x00b2, 0x00b3, 0x2074, 0x2075, 0x2076, 0x2077, 0x2078, 0x2079)
 
+const SUBSCRIPT_TABLE = ('\u2080', '\u2081', '\u2082', '\u2083', '\u2084', '\u2085', '\u2086', '\u2087', '\u2088', '\u2089')
+const SUPERSCRIPT_TABLE = ('\u2070', '\u00b9', '\u00b2', '\u00b3', '\u2074', '\u2075', '\u2076', '\u2077', '\u2078', '\u2079')
 
-function unicode_superscript(i)
-    if i == 0
-        "\u2070"
-    elseif i == 1
-        "\u00B9"
-    elseif i == 2
-        "\u00B2"
-    elseif i == 3
-        "\u00B3"
-    elseif i == 4
-        "\u2074"
-    elseif i == 5
-        "\u2075"
-    elseif i == 6
-        "\u2076"
-    elseif i == 7
-        "\u2077"
-    elseif i == 8
-        "\u2078"
-    elseif i == 9
-        "\u2079"
-    end
-end
+# const SUBSCRIPT_TABLE = ("₀","₁","₂","₃","₄","₅","₆","₇","₈","₉")
+# const SUPERSCRIPT_TABLE = ("⁰","¹","²","³","⁴","⁵","⁶","⁷","⁸","⁹")
+
+unicode_subscript(i::Int) = (SUBSCRIPT_TABLE[i + 1])
+unicode_superscript(i::Int) = (SUPERSCRIPT_TABLE[i + 1])
 
 pretty_power(pow::Int) = join(map(unicode_superscript, reverse(digits(pow))))
 
