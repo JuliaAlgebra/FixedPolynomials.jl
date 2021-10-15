@@ -1,20 +1,6 @@
 import Base: print
 
-function Base.show(io::IO, p::Polynomial)
-    # if p.homogenized
-    #     vars = ["x$i" for i=0:nvariables(p)-1]
-    # else
-    #     vars = ["x$i" for i=1:nvariables(p)]
-    # end
-    print_poly(io, p, variables(p))
-end
-
-# function Base.show(io::IO, P::PolynomialSystem)
-#     for p in P.polys
-#         print_poly(io, p, P.vars)
-#         print(io, "\n")
-#     end
-# end
+Base.show(io::IO, p::Polynomial) = print_poly(io, p, variables(p))
 
 #helpers
 
