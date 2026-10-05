@@ -1,0 +1,12 @@
+name = "FixedPolynomials"
+uuid = "3dd14ad9-0029-526e-86e9-8aa0bdd2ab0d"
+version = "0.4.0"
+
+[deps]
+LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
+MultivariatePolynomials = "102ac46a-7ee4-5c85-9060-abc95bfdeaa3"
+Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
+
+[compat]
+MultivariatePolynomials = "0.2.0 - 0.3"
+julia = "0.7, 1"
