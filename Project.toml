@@ -1,0 +1,18 @@
+name = "FixedPolynomials"
+uuid = "3dd14ad9-0029-526e-86e9-8aa0bdd2ab0d"
+version = "0.4.1"
+
+[deps]
+MultivariatePolynomials = "102ac46a-7ee4-5c85-9060-abc95bfdeaa3"
+
+[compat]
+MultivariatePolynomials = "0.2.0 - 0.3"
+julia = "0.7, 1"
+
+[extras]
+DynamicPolynomials = "7c1d4256-1411-5781-91ec-d7bc3513ac07"
+LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
+Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
+
+[targets]
+test = ["DynamicPolynomials", "LinearAlgebra", "Test"]
